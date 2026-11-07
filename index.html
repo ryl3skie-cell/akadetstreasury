@@ -941,23 +941,29 @@
       pendingAction = null;
     };
 
-    window.submitPasscodeVerification = function() {
-      const inputEl = document.getElementById('passcodeInput');
-      const entered = inputEl ? inputEl.value.trim() : '';
-      const officer = window.readOfficer('officerSelect');
-      if (!officer) return;
-      if (entered.toLowerCase() === masterPasscode.toLowerCase()) {
-        currentOfficer = officer;
-        const actionToRun = pendingAction;
-        unlockedUntil = Date.now() + UNLOCK_MS;
-        clearTimeout(relockTimer);
-        relockTimer = setTimeout(() => { if (window.showToast) showToast('🔒 Editing is locked again. The passcode will be asked next time.'); }, UNLOCK_MS);
-        if (window.showToast) showToast('🔓 Unlocked for 5 minutes as ' + officer);
-        window.closePasscodeModal();
-        window.executeProtectedAction(actionToRun);
-      } else {
-        alert("Oops, wrong passcode! Try again 😅");
-      }
+   window.submitPasscodeVerification = async function() {
+  const inputEl = document.getElementById('passcodeInput');
+  const entered = inputEl ? inputEl.value.trim().toLowerCase() : '';
+  const officer = window.readOfficer('officerSelect');
+  if (!officer) return;
+  
+  // Hash what the user typed
+  const enteredHash = await window.sha256Hex(entered);
+  // Hash the current master passcode
+  const targetHash = await window.sha256Hex(masterPasscode.toLowerCase());
+
+  if (enteredHash === targetHash) {
+    currentOfficer = officer;
+    const actionToRun = pendingAction;
+    unlockedUntil = Date.now() + UNLOCK_MS;
+    clearTimeout(relockTimer);
+    relockTimer = setTimeout(() => { if (window.showToast) showToast('🔒 Editing is locked again. The passcode will be asked next time.'); }, UNLOCK_MS);
+    if (window.showToast) showToast('🔓 Unlocked for 5 minutes as ' + officer);
+    window.closePasscodeModal();
+    window.executeProtectedAction(actionToRun);
+  } else {
+    alert("Oops, wrong passcode! Try again 😅");
+  }
     };
 
     document.addEventListener('DOMContentLoaded', () => {
