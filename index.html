@@ -671,12 +671,12 @@
           <h3 class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
             <i class="fa-solid fa-thumbtack rotate-45"></i> Pinned Threads
           </h3>
-          <div id="pinnedSuggestionsContainer" class="space-y-3"></div>
+          <div id="pinnedSuggestionsContainer" class="space-y-1.5"></div>
         </div>
 
         <div class="space-y-3 pt-2">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">All Recent Threads</h3>
-          <div id="suggestionsContainerFull" class="space-y-3"></div>
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">All Recent Threads <span id="chikaCount" class="normal-case text-slate-500 font-semibold"></span></h3>
+          <div id="suggestionsContainerFull" class="space-y-1.5"></div>
         </div>
       </div>
     </div>
@@ -941,29 +941,23 @@
       pendingAction = null;
     };
 
-   window.submitPasscodeVerification = async function() {
-  const inputEl = document.getElementById('passcodeInput');
-  const entered = inputEl ? inputEl.value.trim().toLowerCase() : '';
-  const officer = window.readOfficer('officerSelect');
-  if (!officer) return;
-  
-  // Hash what the user typed
-  const enteredHash = await window.sha256Hex(entered);
-  // Hash the current master passcode
-  const targetHash = await window.sha256Hex(masterPasscode.toLowerCase());
-
-  if (enteredHash === targetHash) {
-    currentOfficer = officer;
-    const actionToRun = pendingAction;
-    unlockedUntil = Date.now() + UNLOCK_MS;
-    clearTimeout(relockTimer);
-    relockTimer = setTimeout(() => { if (window.showToast) showToast('🔒 Editing is locked again. The passcode will be asked next time.'); }, UNLOCK_MS);
-    if (window.showToast) showToast('🔓 Unlocked for 5 minutes as ' + officer);
-    window.closePasscodeModal();
-    window.executeProtectedAction(actionToRun);
-  } else {
-    alert("Oops, wrong passcode! Try again 😅");
-  }
+    window.submitPasscodeVerification = function() {
+      const inputEl = document.getElementById('passcodeInput');
+      const entered = inputEl ? inputEl.value.trim() : '';
+      const officer = window.readOfficer('officerSelect');
+      if (!officer) return;
+      if (entered.toLowerCase() === masterPasscode.toLowerCase()) {
+        currentOfficer = officer;
+        const actionToRun = pendingAction;
+        unlockedUntil = Date.now() + UNLOCK_MS;
+        clearTimeout(relockTimer);
+        relockTimer = setTimeout(() => { if (window.showToast) showToast('🔒 Editing is locked again. The passcode will be asked next time.'); }, UNLOCK_MS);
+        if (window.showToast) showToast('🔓 Unlocked for 5 minutes as ' + officer);
+        window.closePasscodeModal();
+        window.executeProtectedAction(actionToRun);
+      } else {
+        alert("Oops, wrong passcode! Try again 😅");
+      }
     };
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -1432,7 +1426,7 @@
     window.getAvatarColor = function(name) {
       const colors = ['bg-cyan-500', 'bg-blue-600', 'bg-indigo-600', 'bg-sky-500', 'bg-teal-500'];
       let hash = 0;
-      for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
+      name = String(name || ''); for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
       return colors[Math.abs(hash) % colors.length];
     };
 
@@ -1448,6 +1442,33 @@
         downloadAnchor.click();
         downloadAnchor.remove();
       });
+    };
+
+    // Compact Chika card (shared by pinned + regular lists)
+    window.chikaCard = function(s, pinned) {
+      const pinTitle = pinned ? 'Unpin thread' : 'Pin thread';
+      const pinCls = pinned ? 'text-cyan-400 hover:text-cyan-300' : 'text-slate-500 hover:text-cyan-400';
+      const pinIcon = pinned ? 'fa-thumbtack rotate-45' : 'fa-thumbtack';
+      return `
+          <div class="px-2.5 py-1.5 ${pinned ? 'bg-slate-950/90 border-cyan-500/40' : 'bg-slate-950/70 border-slate-800/80 hover:border-cyan-500/30'} rounded-xl border transition">
+            <div class="flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-full ${window.getAvatarColor(s.author)} flex items-center justify-center text-white font-bold text-[8px] uppercase flex-shrink-0">${escapeHtml(String(s.author).substring(1, 3))}</div>
+              <span class="text-[11px] font-bold ${pinned ? 'text-cyan-300' : 'text-white'} truncate">${escapeHtml(s.author)}</span>
+              <span class="bg-cyan-500/10 text-cyan-400 text-[8px] font-bold px-1.5 rounded-full border border-cyan-500/20 flex-shrink-0">${escapeHtml(s.category || 'Idea')}</span>
+              <span class="text-[9px] text-slate-500 truncate min-w-0">${s.date}${pinned && s.pinnedBy ? ' · pinned by ' + escapeHtml(s.pinnedBy) : ''}</span>
+              <div class="flex items-center gap-0.5 ml-auto flex-shrink-0">
+                <button onclick="promptPasscodeAction('togglePinSuggestion_${s.id}')" class="${pinCls} text-[10px] p-0.5" title="${pinTitle}"><i class="fa-solid ${pinIcon}"></i></button>
+                <button onclick="promptPasscodeAction('editSuggestion_${s.id}')" class="text-slate-500 hover:text-cyan-400 text-[10px] p-0.5" title="Edit thread"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="promptPasscodeAction('deleteSuggestion_${s.id}')" class="text-slate-500 hover:text-rose-400 text-[10px] p-0.5" title="Delete thread"><i class="fa-solid fa-trash-can"></i></button>
+              </div>
+            </div>
+            <div class="flex items-start justify-between gap-2 pl-6.5" style="padding-left:26px">
+              <p class="text-xs ${pinned ? 'text-slate-200' : 'text-slate-300'} leading-snug">${escapeHtml(s.text)}</p>
+              <button onclick="upvoteSuggestion('${s.id}', ${s.upvotes || 0})" class="hover:text-cyan-400 flex items-center gap-1 text-[10px] text-slate-400 transition flex-shrink-0 pt-0.5">
+                <i class="fa-regular fa-heart"></i> ${s.upvotes || 0}
+              </button>
+            </div>
+          </div>`;
     };
 
     // LIVE DATABASE SNAPSHOT LISTENER
@@ -1468,7 +1489,10 @@
         const expenses = Object.entries(expensesObj).map(([id, val]) => ({ id, ...val })).reverse();
         const dues = Object.entries(duesObj).map(([id, val]) => ({ id, ...val })).reverse();
         const fines = Object.entries(finesObj).map(([id, val]) => ({ id, ...val })).reverse();
-        const suggestions = Object.entries(suggestionsObj).map(([id, val]) => ({ id, ...val })).reverse();
+        const suggestions = Object.entries(suggestionsObj)
+          .filter(([id, val]) => val && typeof val === 'object')
+          .map(([id, val]) => ({ id, ...val, author: String(val.author || '@anonymous'), text: String(val.text || ''), date: val.date || '' }))
+          .reverse();
 
         // Calculate Totals
         const totalSpent = expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
@@ -1553,7 +1577,8 @@
         if (window.applyVaultFilter) window.applyVaultFilter();
 
         // Render Home Pinned Messages
-        const pinnedList = suggestions.filter(s => s.pinned);
+        const isPinnedThread = s => s.pinned === true || s.pinned === 'true';
+        const pinnedList = suggestions.filter(isPinnedThread);
         const homePinnedHtml = pinnedList.length ? pinnedList.map(s => `
           <div class="p-3.5 bg-slate-950/90 rounded-2xl border border-cyan-500/40 space-y-1.5">
             <div class="flex items-center justify-between">
@@ -1572,6 +1597,7 @@
         const isVault = d => d.type ? d.type === 'vault' : /^(Friday Auto-Deduct|Paid unpaid dues|Vault deduction)/.test(String(d.date || ''));
         const vaultEntries = dues.filter(isVault);
         const revenueEntries = dues.filter(d => !isVault(d));
+        try {
         // ---- Collected Contributions This Week (Mon-Sun) from the 48 vaults ----
         const entryTime = d => {
           if (d.ts) return d.ts;
@@ -1672,6 +1698,8 @@
           }
         }
 
+        } catch (homeErr) { console.error('Home sections error:', homeErr); }
+
         // Render Expenses
         const expHtml = expenses.length ? expenses.map(e => `
           <div class="flex justify-between items-center p-3 sm:p-3.5 bg-slate-950/70 rounded-2xl border border-slate-800/80 hover:border-cyan-500/40 transition">
@@ -1757,70 +1785,13 @@
           suggBadge.classList.add('hidden');
         }
 
-        const pinnedHtml = pinnedList.length ? pinnedList.map(s => `
-          <div class="p-3.5 sm:p-4 bg-slate-950/90 rounded-2xl border border-cyan-500/40 space-y-2">
-            <div class="flex items-start justify-between">
-              <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-full ${window.getAvatarColor(s.author)} flex items-center justify-center text-white font-bold text-[11px] uppercase shadow-sm flex-shrink-0">
-                  ${escapeHtml(s.author.substring(1, 3))}
-                </div>
-                <div>
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-xs font-bold text-white">${escapeHtml(s.author)}</span>
-                    <span class="bg-cyan-500/10 text-cyan-400 text-[9px] font-bold px-2 py-0.2 rounded-full border border-cyan-500/20">${escapeHtml(s.category || 'Idea')}</span>
-                  </div>
-                  <p class="text-[10px] text-slate-400">${s.date}${s.pinned && s.pinnedBy ? ' · pinned by ' + escapeHtml(s.pinnedBy) : ''}</p>
-                </div>
-              </div>
-              <div class="flex items-center gap-1">
-                <button onclick="promptPasscodeAction('togglePinSuggestion_${s.id}')" class="text-cyan-400 hover:text-cyan-300 text-xs p-1" title="Unpin thread"><i class="fa-solid fa-thumbtack rotate-45"></i></button>
-                <button onclick="promptPasscodeAction('editSuggestion_${s.id}')" class="text-slate-400 hover:text-cyan-400 text-xs p-1" title="Edit thread"><i class="fa-solid fa-pen"></i></button>
-                <button onclick="promptPasscodeAction('deleteSuggestion_${s.id}')" class="text-slate-400 hover:text-rose-400 text-xs p-1" title="Delete thread"><i class="fa-solid fa-trash-can"></i></button>
-              </div>
-            </div>
-            <p class="text-xs text-slate-200 pl-10 sm:pl-11 leading-relaxed">${escapeHtml(s.text)}</p>
-            <div class="flex items-center gap-5 pl-10 sm:pl-11 pt-1 text-[11px] text-slate-400">
-              <button onclick="upvoteSuggestion('${s.id}', ${s.upvotes || 0})" class="hover:text-cyan-400 flex items-center gap-1 transition">
-                <i class="fa-regular fa-heart"></i> ${s.upvotes || 0}
-              </button>
-              <span class="flex items-center gap-1"><i class="fa-regular fa-comment"></i> Thread</span>
-            </div>
-          </div>
-        `).join('') : '<p class="text-slate-500 text-xs italic">Nothing pinned yet. Go pin something! 📌</p>';
+        const pinnedHtml = pinnedList.length ? pinnedList.map(s => window.chikaCard(s, true)).join('') : '<p class="text-slate-500 text-xs italic">Nothing pinned yet. Go pin something! 📌</p>';
         document.getElementById('pinnedSuggestionsContainer').innerHTML = pinnedHtml;
 
-        const regularList = suggestions.filter(s => !s.pinned);
-        const suggHtmlFull = regularList.length ? regularList.map(s => `
-          <div class="p-3.5 sm:p-4 bg-slate-950/70 rounded-2xl border border-slate-800/80 hover:border-cyan-500/30 transition space-y-2">
-            <div class="flex items-start justify-between">
-              <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-full ${window.getAvatarColor(s.author)} flex items-center justify-center text-white font-bold text-[11px] uppercase shadow-sm flex-shrink-0">
-                  ${escapeHtml(s.author.substring(1, 3))}
-                </div>
-                <div>
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-xs font-bold text-white">${escapeHtml(s.author)}</span>
-                    <span class="bg-cyan-500/10 text-cyan-400 text-[9px] font-bold px-2 py-0.2 rounded-full border border-cyan-500/20">${escapeHtml(s.category || 'Idea')}</span>
-                  </div>
-                  <p class="text-[10px] text-slate-500">${s.date}</p>
-                </div>
-              </div>
-              <div class="flex items-center gap-1">
-                <button onclick="promptPasscodeAction('togglePinSuggestion_${s.id}')" class="text-slate-500 hover:text-cyan-400 text-xs p-1" title="Pin thread"><i class="fa-solid fa-thumbtack"></i></button>
-                <button onclick="promptPasscodeAction('editSuggestion_${s.id}')" class="text-slate-500 hover:text-cyan-400 text-xs p-1" title="Edit thread"><i class="fa-solid fa-pen"></i></button>
-                <button onclick="promptPasscodeAction('deleteSuggestion_${s.id}')" class="text-slate-500 hover:text-rose-400 text-xs p-1" title="Delete thread"><i class="fa-solid fa-trash-can"></i></button>
-              </div>
-            </div>
-            <p class="text-xs text-slate-300 pl-10 sm:pl-11 leading-relaxed">${escapeHtml(s.text)}</p>
-            <div class="flex items-center gap-5 pl-10 sm:pl-11 pt-1 text-[11px] text-slate-400">
-              <button onclick="upvoteSuggestion('${s.id}', ${s.upvotes || 0})" class="hover:text-cyan-400 flex items-center gap-1 transition">
-                <i class="fa-regular fa-heart"></i> ${s.upvotes || 0}
-              </button>
-              <span class="flex items-center gap-1"><i class="fa-regular fa-comment"></i> Thread</span>
-            </div>
-          </div>
-        `).join('') : '<p class="text-slate-500 text-xs sm:text-sm">So quiet... start a chika! 🦗</p>';
+        const regularList = suggestions.filter(s => !isPinnedThread(s));
+        const suggHtmlFull = regularList.length ? regularList.map(s => window.chikaCard(s, false)).join('') : '<p class="text-slate-500 text-xs sm:text-sm">So quiet... start a chika! 🦗</p>';
         document.getElementById('suggestionsContainerFull').innerHTML = suggHtmlFull;
+        const cc = document.getElementById('chikaCount'); if (cc) cc.textContent = `(${regularList.length} message${regularList.length === 1 ? '' : 's'}, pinned ones are listed above)`;
 
         window.checkFridayDeduction(false);
       });
