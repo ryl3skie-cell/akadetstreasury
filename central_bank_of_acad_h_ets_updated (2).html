@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Central Bank of Acad H(ets)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              400: '#38bdf8',
+              500: '#06b6d4',
+              600: '#0284c7',
+              950: '#082f49'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .glass-card {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(56, 189, 248, 0.18);
+    }
+    .glow-cyan {
+      box-shadow: 0 0 35px -5px rgba(6, 182, 212, 0.3);
+    }
+    .glow-blue {
+      box-shadow: 0 0 35px -5px rgba(59, 130, 246, 0.3);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.3);
+    }
+    .glow-purple {
+      box-shadow: 0 0 35px -5px rgba(168, 85, 247, 0.3);
+    }
+    .medical-grid {
+      background-image: radial-gradient(rgba(56, 189, 248, 0.12) 1.5px, transparent 1.5px);
+      background-size: 20px 20px;
+    }
+    @keyframes floatOrb {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-18px) scale(1.08); }
+    }
+    .animate-float {
+      animation: floatOrb 7s ease-in-out infinite;
+    }
+    @keyframes progressAnim {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+    .animate-progress {
+      animation: progressAnim 60s linear infinite;
+    }
+    .card-hover {
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @media (min-width: 640px) {
+      .card-hover:hover {
+        transform: translateY(-4px) scale(1.005);
+        box-shadow: 0 16px 35px -5px rgba(6, 182, 212, 0.35);
+        border-color: rgba(56, 189, 248, 0.45);
+      }
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .shimmer-text { background-size: 200% auto; animation: shimmer 5s linear infinite; }
+    @keyframes shimmer { to { background-position: 200% center; } }
+    .bg-emoji { position: absolute; font-size: 28px; opacity: 0; animation: riseUp 16s linear infinite; }
+    @keyframes riseUp { 0% { transform: translateY(0) rotate(0); opacity: 0; } 10% { opacity: .22; } 90% { opacity: .22; } 100% { transform: translateY(-95vh) rotate(25deg); opacity: 0; } }
+    @keyframes popIn { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: none; } }
+    .glass-card { animation: popIn .55s cubic-bezier(.34,1.56,.64,1) backwards; }
+    @keyframes wiggle { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-14deg) scale(1.15); } 75% { transform: rotate(14deg) scale(1.15); } }
+    button:hover > i { animation: wiggle .45s ease; }
+    button { transition: transform .15s ease; }
+    button:active { transform: scale(.92) !important; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(20px) scale(.9); } to { opacity: 1; transform: none; } }
+    .toast { animation: toastIn .35s cubic-bezier(.34,1.56,.64,1) both; transition: opacity .4s; }
+    .confetti { position: fixed; top: -20px; z-index: 70; pointer-events: none; font-size: 22px; animation: fall linear forwards; }
+    @keyframes fall { to { transform: translateY(105vh) rotate(720deg); opacity: .9; } }
+    .stat-bump { animation: bump .5s ease; }
+    @keyframes bump { 40% { transform: scale(1.18); } }
+    body, button, input, select, textarea { font-family: 'Fredoka', ui-rounded, 'Segoe UI', system-ui, sans-serif; }
+    .glass-card { border: 2px solid rgba(56,189,248,.35); border-radius: 1.75rem !important; box-shadow: 6px 6px 0 rgba(6,182,212,.22); transition: rotate .3s cubic-bezier(.34,1.56,.64,1), transform .3s, box-shadow .3s; }
+    .sticker-head { border: 2px solid rgba(56,189,248,.5); box-shadow: 6px 6px 0 rgba(6,182,212,.35), 0 12px 30px rgba(0,0,0,.4); }
+    .glow-emerald { border-color: rgba(52,211,153,.7) !important; box-shadow: 7px 7px 0 rgba(16,185,129,.4) !important; }
+    .glow-cyan { border-color: rgba(34,211,238,.7) !important; box-shadow: 7px 7px 0 rgba(6,182,212,.4) !important; }
+    .glow-blue { border-color: rgba(96,165,250,.7) !important; box-shadow: 7px 7px 0 rgba(59,130,246,.4) !important; }
+    main .grid > .glass-card:nth-child(odd) { rotate: -1.2deg; }
+    main .grid > .glass-card:nth-child(even) { rotate: 1deg; }
+    main .grid > .glass-card:hover { rotate: 0deg; }
+    .dock { background: rgba(15,23,42,.94); backdrop-filter: blur(14px); border: 2px solid rgba(56,189,248,.5); border-radius: 9999px; box-shadow: 6px 6px 0 rgba(6,182,212,.35), 0 14px 34px rgba(0,0,0,.55); }
+    .dock > div { padding-left: .5rem; padding-right: .5rem; }
+    .dock button { border-radius: 9999px !important; white-space: nowrap; font-size: 13px; }
+    .dock > div > button:first-child { margin-left: auto; }
+    .dock > div > button:last-child { margin-right: auto; }
+    .marquee { overflow: hidden; white-space: nowrap; margin: 18px -10px 6px; padding: 7px 0; rotate: -1deg; color: #fff; font-weight: 700; font-size: 12px; background: linear-gradient(90deg,#0891b2,#7c3aed,#db2777,#0891b2); box-shadow: 0 6px 20px rgba(124,58,237,.35); position: relative; z-index: 5; }
+    .marquee > div { display: inline-block; animation: scrollX 30s linear infinite; }
+    @keyframes scrollX { to { transform: translateX(-50%); } }
+    #studentAccountsGrid > div, [id^="expensesContainer"] > div, [id^="finesContainer"] > div, [id^="duesContainer"] > div { transition: rotate .25s cubic-bezier(.34,1.56,.64,1), scale .25s; border-left-width: 5px !important; }
+    #studentAccountsGrid > div { border-left-color: rgba(34,211,238,.8) !important; }
+    [id^="expensesContainer"] > div { border-left-color: rgba(59,130,246,.8) !important; }
+    [id^="finesContainer"] > div { border-left-color: rgba(244,63,94,.8) !important; }
+    [id^="duesContainer"] > div { border-left-color: rgba(16,185,129,.8) !important; }
+    #studentAccountsGrid > div:nth-child(even) { rotate: .5deg; }
+    #studentAccountsGrid > div:nth-child(odd) { rotate: -.4deg; }
+    #studentAccountsGrid > div:hover, [id^="expensesContainer"] > div:hover, [id^="finesContainer"] > div:hover, [id^="duesContainer"] > div:hover { rotate: -1deg; scale: 1.02; }
+    .tab-pop { animation: popIn .45s cubic-bezier(.34,1.56,.64,1) backwards; }
+    h2.font-bold, h3.font-bold { letter-spacing: -.01em; }
+    .shake { animation: shake .4s; }
+    @keyframes shake { 20%,60% { transform: translateX(-10px); } 40%,80% { transform: translateX(10px); } }
+
+    /* ===== MOBILE HARMONY ===== */
+    .dock button { position: relative; display: inline-flex; align-items: center; gap: 6px; flex: none; }
+    .tab-emoji { font-size: 16px; line-height: 1; }
+    .dock #suggestionBadge { position: absolute; top: -2px; right: 2px; }
+    @media (max-width: 639px) {
+      input, select, textarea { font-size: 16px !important; }
+      main { margin-top: 1rem; }
+      .dock { width: calc(100% - 1rem) !important; border-radius: 28px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important; }
+      .dock > div { padding: 6px; gap: 2px; overflow: visible; justify-content: space-between; }
+      .dock button { flex: 1 1 0; min-width: 0; flex-direction: column; gap: 2px; padding: 6px 0 !important; font-size: 10px !important; line-height: 1.1; border-radius: 18px !important; }
+      .dock .tab-emoji { font-size: 21px; }
+      .dock > div > button:first-child { margin-left: 0; }
+      .dock > div > button:last-child { margin-right: 0; }
+      .dock #suggestionBadge { top: 0; right: 6px; }
+      #toastBox { bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important; width: calc(100% - 2rem); }
+      .toast { max-width: 100%; text-align: center; }
+      .glass-card { box-shadow: 4px 4px 0 rgba(6,182,212,.22); border-radius: 1.4rem !important; }
+      .glow-emerald { box-shadow: 5px 5px 0 rgba(16,185,129,.4) !important; }
+      .glow-cyan { box-shadow: 5px 5px 0 rgba(6,182,212,.4) !important; }
+      .glow-blue { box-shadow: 5px 5px 0 rgba(59,130,246,.4) !important; }
+      main .grid > .glass-card:nth-child(odd) { rotate: -.5deg; }
+      main .grid > .glass-card:nth-child(even) { rotate: .5deg; }
+      .sticker-head { box-shadow: 4px 4px 0 rgba(6,182,212,.35); }
+      .marquee { margin: 14px -6px 4px; font-size: 11px; }
+
+      /* list rows: title on top, actions underneath */
+      [id^="expensesContainer"] > div, [id^="finesContainer"] > div, [id^="duesContainer"] > div { flex-wrap: wrap; row-gap: 8px; }
+      [id^="expensesContainer"] > div > div:first-child, [id^="finesContainer"] > div > div:first-child, [id^="duesContainer"] > div > div:first-child { flex: 1 1 100%; padding-right: 0; }
+      [id^="expensesContainer"] > div > div:last-child, [id^="finesContainer"] > div > div:last-child, [id^="duesContainer"] > div > div:last-child { flex: 1 1 100%; justify-content: space-between; }
+      [id^="finesContainer"] button[onclick*="toggleFinePaid"] { font-size: 11px !important; padding: 8px 12px !important; }
+      button.p-1 { padding: 10px !important; }
+      button[onclick^="upvoteSuggestion"] { padding: 8px 6px; }
+
+      /* 48 vaults: two per row */
+      #studentAccountsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
+      #studentAccountsGrid > div { padding: 10px !important; }
+      #studentAccountsGrid > div > div:first-child { flex-direction: column; align-items: flex-start; gap: 6px; }
+      #studentAccountsGrid .grid button { padding: 9px 2px; font-size: 11px; }
+      #tabContent-accounts .flex.items-center.gap-2 { flex-wrap: wrap; }
+    }
+    @media (hover: none) {
+      #studentAccountsGrid > div:hover, [id^="expensesContainer"] > div:hover, [id^="finesContainer"] > div:hover, [id^="duesContainer"] > div:hover { rotate: 0deg; scale: 1; }
+    }
+    #settingsModal > div, #passcodeModal > div, #gateCard { max-height: 92vh; overflow-y: auto; }
+
+    /* ===== MOBILE SIZE FIX: nothing may be wider than the screen ===== */
+    html { overflow-x: hidden; -webkit-text-size-adjust: 100%; max-width: 100%; }
+    body { overflow-x: clip; max-width: 100vw; }
+    main, header, footer { max-width: 100%; }
+    .sticker-head > div > div:first-child { min-width: 0; flex: 1 1 auto; }
+    .sticker-head > div > div:last-child { flex-shrink: 0; }
+    #suggestionsContainerFull, #pinnedSuggestionsContainer, #homePinnedContainer, [id^="expensesContainer"], [id^="finesContainer"], [id^="duesContainer"] { overflow-wrap: anywhere; }
+    @media (max-width: 639px) {
+      .marquee { margin: 14px 0 4px !important; }
+      .sticker-head { margin-left: .5rem !important; margin-right: .5rem !important; }
+      .sticker-head > div { padding-left: .75rem; padding-right: .75rem; }
+      .sticker-head h1 { white-space: normal; font-size: 15px; line-height: 1.15; }
+      .sticker-head p { display: none; }
+      main { padding-left: .75rem; padding-right: .75rem; }
+      #statBalance { font-size: clamp(2rem, 12vw, 3.5rem) !important; }
+      #statCollected, #statSpent, #statPendingFines, #statUnpaidDues { font-size: clamp(1rem, 5.2vw, 1.5rem) !important; }
+      #studentAccountsGrid .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
+      #studentAccountsGrid .grid button { font-size: 11px; padding: 10px 0; overflow: hidden; white-space: nowrap; }
+      #studentAccountsGrid span { overflow-wrap: anywhere; }
+      .glass-card { padding-left: 1rem !important; padding-right: 1rem !important; }
+    }
+
+    /* ===== MOBILE FIX 2: vault cards, summary cards, button rows ===== */
+    @media (max-width: 639px) {
+      #vaultSearchRow { flex-wrap: nowrap !important; }
+      #vaultShowAllBtn { padding-left: 10px; padding-right: 10px; font-size: 11px; }
+      #tabContent-accounts .flex-wrap > button { flex: 1 1 calc(50% - 8px); justify-content: center; text-align: center; padding-left: 8px; padding-right: 8px; }
+      #tabContent-accounts h2 { font-size: 1.05rem; }
+      #vaultTotalContrib, #vaultUnpaidTotal { font-size: clamp(1.3rem, 7.5vw, 1.8rem); }
+      #vaultTotalSub { overflow-wrap: anywhere; }
+      #studentAccountsGrid .space-y-1 > div { flex-direction: column; align-items: flex-start; gap: 0; }
+      #studentAccountsGrid .space-y-1 > div > span:first-child { font-size: 10px; }
+      #studentAccountsGrid > div > div:first-child .truncate { white-space: normal; overflow-wrap: anywhere; line-height: 1.15; }
+      #studentAccountsGrid > div > div:first-child button { padding: 4px !important; }
+      #statBalance { word-break: break-word; }
+      #statBalance ~ button, #statBalance + p + button { margin-top: .5rem; }
+      #passcodeModal > div, #settingsModal > div, #classPwModal > div { padding: 1.25rem; }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-cyan-500 selection:text-white pb-32 medical-grid relative overflow-x-hidden">
+
+  <!-- CLASS PASSWORD GATE -->
+  <div id="classGate" class="fixed inset-0 z-[100] bg-slate-950 medical-grid flex items-center justify-center p-4 overflow-hidden">
+    <div class="fixed -top-10 -left-10 w-72 h-72 bg-cyan-500/20 rounded-full filter blur-[100px] animate-float pointer-events-none"></div>
+    <div class="fixed bottom-0 -right-10 w-72 h-72 bg-purple-600/20 rounded-full filter blur-[100px] animate-float pointer-events-none" style="animation-delay:-3s"></div>
+    <div id="gateCard" class="glass-card relative rounded-3xl p-7 max-w-sm w-full text-center">
+      <div class="text-6xl mb-2 animate-bounce">🏦</div>
+      <h2 class="text-2xl font-black text-white">Class Members Only! 🔒</h2>
+      <p class="text-xs text-slate-400 mt-1 mb-5">Enter the class password to get into the Central Bank of Acad H(ets). Forgot it? Ask your officers 💙</p>
+      <input id="gateInput" type="password" placeholder="Class password..." autocomplete="off" class="w-full bg-slate-950 border-2 border-slate-800 rounded-2xl px-4 py-3 text-sm text-slate-100 text-center focus:outline-none focus:border-cyan-500 mb-2">
+      <p id="gateMsg" class="text-xs h-4 mb-2 text-rose-300"></p>
+      <label class="flex items-center justify-center gap-2 text-[11px] text-slate-400 mb-4"><input id="gateRemember" type="checkbox" checked class="accent-cyan-500"> Remember me on this device</label>
+      <button id="gateBtn" onclick="submitClassPassword()" class="w-full py-3 rounded-2xl font-bold text-sm text-white bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 shadow-lg active:scale-95">Let me in! 🚪</button>
+    </div>
+  </div>
+
+  <!-- BACKGROUND DECORATIVE GLOW ORBS -->
+  <div class="fixed -top-10 -left-10 w-72 sm:w-96 h-72 sm:h-96 bg-cyan-500/15 rounded-full filter blur-[90px] sm:blur-[120px] pointer-events-none animate-float"></div>
+  <div class="fixed bottom-10 -right-10 w-72 sm:w-96 h-72 sm:h-96 bg-blue-600/15 rounded-full filter blur-[100px] sm:blur-[130px] pointer-events-none animate-float" style="animation-delay: -3.5s;"></div>
+  <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 sm:w-80 h-64 sm:h-80 bg-purple-600/10 rounded-full filter blur-[100px] pointer-events-none animate-float" style="animation-delay: -1.8s;"></div>
+
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
+    <span class="bg-emoji" style="left:6%;top:70%;animation-delay:0s">🩺</span>
+    <span class="bg-emoji" style="left:22%;top:85%;animation-delay:-4s">💊</span>
+    <span class="bg-emoji" style="left:48%;top:90%;animation-delay:-8s">🧬</span>
+    <span class="bg-emoji" style="left:72%;top:80%;animation-delay:-2s">🫀</span>
+    <span class="bg-emoji" style="left:90%;top:88%;animation-delay:-6s">🔬</span>
+  </div>
+  <div id="toastBox" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] flex flex-col items-center gap-2 pointer-events-none"></div>
+  <!-- TOP STATUS BANNER -->
+  <div id="statusBanner" class="bg-gradient-to-r from-cyan-950 via-slate-900 to-blue-950 border-b border-cyan-500/30 text-cyan-300 text-[11px] sm:text-xs py-2 px-3 text-center font-bold tracking-wide flex items-center justify-center gap-2 sticky top-0 z-50 backdrop-blur-md shadow-lg shadow-cyan-950/40">
+    <span class="relative flex h-2.5 w-2.5">
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400 shadow-sm shadow-cyan-400"></span>
+    </span>
+    <i class="fa-solid fa-heart-pulse text-cyan-400 text-xs animate-pulse"></i>
+    <span id="bannerText">Live and synced with the whole class ⚡</span>
+  </div>
+
+  <!-- NAVIGATION HEADER -->
+  <header class="sticker-head mx-3 sm:mx-6 mt-3 rounded-3xl bg-slate-900/90 sm:sticky sm:top-[46px] z-40 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+      <div class="flex items-center gap-2.5 sm:gap-4">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-cyan-400 via-blue-600 to-indigo-500 glow-cyan flex items-center justify-center shadow-lg shadow-cyan-500/30 flex-shrink-0">
+          <i class="fa-solid fa-vault text-slate-950 text-lg sm:text-2xl"></i>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <h1 class="font-black text-base sm:text-2xl tracking-tight bg-gradient-to-r from-white via-cyan-100 to-cyan-400 bg-clip-text text-transparent truncate shimmer-text">Central Bank of Acad H(ets)</h1>
+            <span class="hidden sm:flex bg-cyan-500/20 text-cyan-300 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-cyan-400/40 uppercase tracking-wider items-center gap-1">
+              <i class="fa-solid fa-notes-medical text-[10px]"></i> STEM 2026–2027
+            </span>
+          </div>
+          <p class="text-[11px] sm:text-xs text-slate-400 font-semibold truncate">Where our class money lives 💸</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5 sm:gap-3">
+        <button onclick="promptPasscodeAction('addDues')" class="bg-slate-800 hover:bg-slate-700 text-slate-100 text-[11px] sm:text-xs font-bold px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl border border-slate-700 transition shadow-md flex items-center gap-1.5 active:scale-95">
+          <i class="fa-solid fa-hand-holding-dollar text-emerald-400"></i> <span class="hidden sm:inline">Add Revenue</span>
+        </button>
+        <button onclick="promptPasscodeAction('addExpense')" class="bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-[11px] sm:text-xs font-bold px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl transition shadow-lg shadow-cyan-950/60 flex items-center gap-1.5 active:scale-95">
+          <i class="fa-solid fa-receipt"></i> <span class="hidden sm:inline">Log Expense</span>
+        </button>
+        <button onclick="openClassPwModal()" title="Class Password" class="p-2 sm:p-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-slate-400 hover:text-white transition active:scale-95">
+          <i class="fa-solid fa-lock text-xs sm:text-sm"></i>
+        </button>
+        <button onclick="openPasscodeSettings()" title="Officers' Passcode" class="p-2 sm:p-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-slate-400 hover:text-white transition active:scale-95">
+          <i class="fa-solid fa-sliders text-xs sm:text-sm"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- SUB-HEADER REALTIME BACKUP CONTROLS -->
+  <div class="bg-slate-900/60 border-b border-slate-800/60 py-1.5 px-4 text-[11px] sm:text-xs font-medium">
+    <div class="max-w-7xl mx-auto flex items-center justify-between text-slate-400">
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <i class="fa-solid fa-database text-cyan-400 animate-pulse text-[10px]"></i>
+        <span class="truncate">Database Controls:</span>
+      </div>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button onclick="exportDataJSON()" class="hover:text-cyan-300 transition flex items-center gap-1 font-semibold"><i class="fa-solid fa-download text-[10px]"></i> <span class="hidden sm:inline">Export JSON</span></button>
+        <span>•</span>
+        <button onclick="promptPasscodeAction('clearData')" class="hover:text-rose-400 transition flex items-center gap-1 font-semibold"><i class="fa-solid fa-trash-can text-[10px]"></i> Reset Database</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="marquee" aria-hidden="true"><div>
+    <span>💸 ₱5 every Friday, kaya natin 'to 💪 &nbsp;•&nbsp; 🧾 No receipt, no expense &nbsp;•&nbsp; 🩺 Future doctors, present and paying dues! &nbsp;•&nbsp; 🎉 Pitch in for the class! &nbsp;•&nbsp; 👀 Everyone can see everything here &nbsp;•&nbsp; </span>
+    <span>💸 ₱5 every Friday, kaya natin 'to 💪 &nbsp;•&nbsp; 🧾 No receipt, no expense &nbsp;•&nbsp; 🩺 Future doctors, present and paying dues! &nbsp;•&nbsp; 🎉 Pitch in for the class! &nbsp;•&nbsp; 👀 Everyone can see everything here &nbsp;•&nbsp; </span>
+  </div></div>
+  <!-- TABBED NAVIGATION -->
+  <div class="dock fixed bottom-3 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1.5rem)] max-w-3xl">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 flex gap-1.5 sm:gap-2 overflow-x-auto py-2 no-scrollbar">
+      <button onclick="switchTab('overview')" id="tabBtn-overview" class="px-3 sm:px-4 py-2 text-xs font-black rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-950 transition-all flex items-center gap-1.5 flex-shrink-0"><span class="tab-emoji">🏠</span><span class="tab-label">Home</span></button>
+      <button onclick="switchTab('accounts')" id="tabBtn-accounts" class="px-3 sm:px-4 py-2 text-xs font-bold rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-800/80 transition-all flex items-center gap-1.5 flex-shrink-0"><span class="tab-emoji">🔐</span><span class="tab-label">Vaults</span></button>
+      <button onclick="switchTab('expenses')" id="tabBtn-expenses" class="px-3 sm:px-4 py-2 text-xs font-bold rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-800/80 transition-all flex items-center gap-1.5 flex-shrink-0"><span class="tab-emoji">🧾</span><span class="tab-label">Expenses</span></button>
+      <button onclick="switchTab('fines')" id="tabBtn-fines" class="px-3 sm:px-4 py-2 text-xs font-bold rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-800/80 transition-all flex items-center gap-1.5 flex-shrink-0"><span class="tab-emoji">🌼</span><span class="tab-label">Reminders</span></button>
+      <button onclick="switchTab('dues')" id="tabBtn-dues" class="px-3 sm:px-4 py-2 text-xs font-bold rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-800/80 transition-all flex items-center gap-1.5 flex-shrink-0"><span class="tab-emoji">💰</span><span class="tab-label">Revenue</span></button>
+      <button onclick="switchTab('suggestions')" id="tabBtn-suggestions" class="px-3 sm:px-4 py-2 text-xs font-bold rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-800/80 transition-all flex items-center gap-1.5 flex-shrink-0 relative"><span class="tab-emoji">💬</span><span class="tab-label">Chika</span>
+        <span id="suggestionBadge" class="bg-cyan-400 text-slate-950 font-black text-[9px] px-1.5 py-0.5 rounded-full hidden shadow-sm">0</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN DASHBOARD CONTENT -->
+  <main class="max-w-7xl mx-auto px-3 sm:px-6 mt-4 sm:mt-8 relative z-10">
+    
+    <!-- UNIFIED HERO BANNER (GREETING + MEDICAL Trivia) -->
+    <div class="glass-card rounded-3xl p-5 sm:p-7 mb-6 sm:mb-8 border border-cyan-500/35 glow-cyan relative overflow-hidden card-hover">
+      <div class="absolute -right-8 -top-8 w-40 h-40 bg-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
+      
+      <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-5 relative z-10">
+        <div class="flex items-center gap-3.5 sm:gap-4 flex-1">
+          <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-cyan-400 via-blue-600 to-purple-600 flex items-center justify-center text-slate-950 text-2xl sm:text-3xl font-black shadow-lg shadow-cyan-500/30 flex-shrink-0">
+            <i id="greetingIcon" class="fa-solid fa-sun text-yellow-300"></i>
+          </div>
+          <div>
+            <h2 id="stemGreeting" class="text-lg sm:text-2xl font-black tracking-tight text-white">
+              Good Day, Alipin ng STEM! <span class="animate-pulse">🩺</span>
+            </h2>
+            <p class="text-xs text-slate-400 font-medium mt-0.5"><span id="heroTagline">Hey there! Let's check on our class money.</span></p>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between md:justify-end gap-3 border-t md:border-t-0 border-slate-800/80 pt-3 md:pt-0">
+          <div id="liveClock" class="text-xs font-mono font-bold text-cyan-400 bg-slate-950/80 px-3 py-1.5 rounded-xl border border-slate-800/80 shadow-inner">00:00:00 AM</div>
+          <button onclick="nextFunFact()" class="text-[11px] bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 px-3 py-1.5 rounded-xl border border-purple-500/40 font-bold transition flex items-center gap-1.5 active:scale-95 shadow-sm">
+            <i class="fa-solid fa-shuffle text-[10px]"></i> <span class="text-[10px] sm:text-[11px]">Next fact!</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-4 sm:mt-5 pt-4 border-t border-slate-800/70">
+        <div class="flex items-center gap-2 text-purple-400 text-[10px] sm:text-xs font-black uppercase tracking-wider mb-1.5">
+          <i class="fa-solid fa-microscope text-xs animate-bounce"></i> Did You Know? (Med Edition) 🧠
+        </div>
+        <p id="funFactText" class="text-xs sm:text-sm text-slate-200 font-medium italic transition-opacity duration-300 leading-relaxed">
+          Digging up a surprising fact... 🔍
+        </p>
+        <div class="w-full bg-slate-950 h-1 rounded-full mt-3 overflow-hidden border border-slate-800/60">
+          <div id="factProgressBar" class="bg-gradient-to-r from-purple-500 via-cyan-400 to-blue-500 h-full w-0 animate-progress"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS SUMMARY CARDS -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-8 sm:mb-10">
+      <div class="glass-card rounded-2xl p-4 sm:p-6 glow-emerald card-hover relative overflow-hidden group col-span-2 lg:row-span-2 flex flex-col justify-center"><div class="absolute -right-3 -bottom-4 text-7xl sm:text-9xl opacity-10 select-none">🐷</div>
+        <button onclick="promptPasscodeAction('editCash')" title="Edit cash on hand" class="relative z-10 self-start mt-3 bg-slate-800/90 hover:bg-slate-700 text-emerald-300 border border-emerald-500/40 text-xs font-bold px-3 py-2 rounded-xl active:scale-95">✏️ Edit</button>
+        <div class="flex justify-between items-start mb-2 sm:mb-3">
+          <span class="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-400">Cash on Hand 💵</span>
+          <div class="p-1.5 sm:p-2.5 bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/30">
+            <i class="fa-solid fa-scale-balanced text-xs sm:text-sm"></i>
+          </div>
+        </div>
+        <div id="statBalance" class="text-5xl sm:text-6xl lg:text-7xl font-black text-emerald-400 tracking-tight my-2">₱0.00</div>
+        <p class="text-[10px] sm:text-xs text-slate-400 mt-1 sm:mt-2 font-semibold">Our money right now</p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 sm:p-6 glow-cyan card-hover relative overflow-hidden group">
+        <div class="flex justify-between items-start mb-2 sm:mb-3">
+          <span class="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-400">Total Collected 📈</span>
+          <div class="p-1.5 sm:p-2.5 bg-cyan-500/20 text-cyan-400 rounded-xl border border-cyan-500/30">
+            <i class="fa-solid fa-chart-line text-xs sm:text-sm"></i>
+          </div>
+        </div>
+        <div id="statCollected" class="text-xl sm:text-4xl font-black text-slate-100 tracking-tight">₱0.00</div>
+        <p class="text-[10px] sm:text-xs text-slate-400 mt-1 sm:mt-2 font-semibold">Contributions + revenue + paid fines</p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 sm:p-6 glow-blue card-hover relative overflow-hidden group">
+        <div class="flex justify-between items-start mb-2 sm:mb-3">
+          <span class="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-400">Total Spent 💸</span>
+          <div class="p-1.5 sm:p-2.5 bg-blue-500/20 text-blue-400 rounded-xl border border-blue-500/30">
+            <i class="fa-solid fa-arrow-up-right-dots text-xs sm:text-sm"></i>
+          </div>
+        </div>
+        <div id="statSpent" class="text-xl sm:text-4xl font-black text-blue-400 tracking-tight">₱0.00</div>
+        <p class="text-[10px] sm:text-xs text-slate-400 mt-1 sm:mt-2 font-semibold">All for the class, promise</p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 sm:p-6 card-hover relative overflow-hidden group">
+        <div class="flex justify-between items-start mb-2 sm:mb-3">
+          <span class="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-400">Pending Fines 🌼</span>
+          <div class="p-1.5 sm:p-2.5 bg-rose-500/20 text-rose-400 rounded-xl border border-rose-500/30">
+            <i class="fa-solid fa-circle-exclamation text-xs sm:text-sm"></i>
+          </div>
+        </div>
+        <div id="statPendingFines" class="text-xl sm:text-4xl font-black text-rose-400 tracking-tight">₱0.00</div>
+        <p class="text-[10px] sm:text-xs text-slate-400 mt-1 sm:mt-2 font-semibold">Can still be paid, no rush 💛</p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 sm:p-6 card-hover relative overflow-hidden group">
+        <div class="flex justify-between items-start mb-2 sm:mb-3">
+          <span class="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-400">Unpaid Dues 🌼</span>
+          <div class="p-1.5 sm:p-2.5 bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/30">
+            <i class="fa-solid fa-hourglass-half text-xs sm:text-sm"></i>
+          </div>
+        </div>
+        <div id="statUnpaidDues" class="text-xl sm:text-4xl font-black text-amber-400 tracking-tight">₱0.00</div>
+      </div>
+    </div>
+
+    <!-- TAB 1: OVERVIEW DASHBOARD CONTENT -->
+    <div id="tabContent-overview" class="space-y-6 sm:space-y-8">
+      <!-- COLLECTED CONTRIBUTIONS THIS WEEK -->
+      <div class="glass-card rounded-3xl p-5 sm:p-6 shadow-xl border border-emerald-500/40 glow-emerald">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 text-emerald-400 font-black text-xs sm:text-sm uppercase tracking-wider">
+              <i class="fa-solid fa-calendar-week"></i> Collected Contributions This Week 🔐
+            </div>
+            <p id="weekRange" class="text-[11px] text-slate-400 mt-1 font-semibold">Mon – Sun</p>
+          </div>
+          <div class="text-right flex-shrink-0">
+            <div id="weekCollected" class="text-3xl sm:text-4xl font-black text-emerald-400 tracking-tight">₱0.00</div>
+            <p id="weekCount" class="text-[10px] sm:text-xs text-slate-400 font-semibold"></p>
+          </div>
+        </div>
+        <p id="weekPaidLine" class="text-[11px] sm:text-xs text-emerald-300 font-bold mt-3"></p>
+        <p class="text-[10px] text-slate-500 mt-0.5">Money collected from the 48 student vaults (₱5 Fridays, advances, and paid-off unpaid dues).</p>
+        <div id="weekBreakdown" class="grid grid-cols-7 gap-1.5 mt-3"></div>
+        <div id="weekList" class="space-y-1.5 mt-3"></div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+        <!-- TO BUY ANNOUNCEMENTS -->
+        <div class="glass-card rounded-3xl p-5 sm:p-6 shadow-xl border border-amber-500/40">
+          <div class="flex items-center justify-between mb-3 border-b border-slate-800/80 pb-3">
+            <div class="flex items-center gap-2 text-amber-400 font-black text-xs sm:text-sm uppercase tracking-wider">
+              <i class="fa-solid fa-cart-shopping"></i> 🛒 To Buy Announcements
+            </div>
+            <button onclick="promptPasscodeAction('addToBuy')" class="text-xs bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 px-3 py-1.5 rounded-xl transition font-bold flex items-center gap-1.5 active:scale-95">
+              <i class="fa-solid fa-plus text-[10px]"></i> Add
+            </button>
+          </div>
+          <div id="toBuyContainer" class="space-y-2.5">
+            <p class="text-slate-500 text-xs italic">Nothing to buy right now. 🎉</p>
+          </div>
+        </div>
+
+        <!-- NEXT PROJECT -->
+        <div class="glass-card rounded-3xl p-5 sm:p-6 shadow-xl border border-purple-500/40">
+          <div class="flex items-center justify-between mb-3 border-b border-slate-800/80 pb-3 gap-2">
+            <div class="flex items-center gap-2 text-purple-400 font-black text-xs sm:text-sm uppercase tracking-wider">
+              <i class="fa-solid fa-bullseye"></i> 🎯 Next Project
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="promptPasscodeAction('editProject')" class="text-xs bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 px-3 py-1.5 rounded-xl transition font-bold active:scale-95">✏️ Set</button>
+              <button onclick="promptPasscodeAction('addProjectItem')" class="text-xs bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 px-3 py-1.5 rounded-xl transition font-bold flex items-center gap-1.5 active:scale-95">
+                <i class="fa-solid fa-plus text-[10px]"></i> Item
+              </button>
+            </div>
+          </div>
+          <div id="nextProjectContainer">
+            <p class="text-slate-500 text-xs italic">No project planned yet. The Officers can set one with ✏️ Set.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-3xl p-5 sm:p-6 shadow-xl border border-cyan-500/40">
+        <div class="flex items-center justify-between mb-3 border-b border-slate-800/80 pb-3">
+          <div class="flex items-center gap-2 text-cyan-400 font-black text-xs sm:text-sm uppercase tracking-wider">
+            <i class="fa-solid fa-thumbtack text-cyan-400 rotate-45 animate-bounce"></i> 📌 Pinned Chika & Announcements
+          </div>
+          <button onclick="switchTab('suggestions')" class="text-xs text-cyan-400 hover:underline font-bold">Go to Chika →</button>
+        </div>
+        <div id="homePinnedContainer" class="space-y-3">
+          <p class="text-slate-500 text-xs italic">No pinned announcements yet. The Officers can pin threads from the Chika tab!</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+        <div class="glass-card rounded-3xl p-5 sm:p-7 shadow-xl card-hover">
+          <div class="flex items-center justify-between mb-5">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                <i class="fa-solid fa-receipt text-sm sm:text-base"></i>
+              </div>
+              <div>
+                <h2 class="font-bold text-base sm:text-lg text-white">Receipts Corner 🧾</h2>
+                <p class="text-[11px] sm:text-xs text-slate-400">Where did the money go?</p>
+              </div>
+            </div>
+            <button onclick="switchTab('expenses')" class="text-xs font-bold text-cyan-400 hover:underline flex items-center gap-1">
+              View All <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+          </div>
+          <div id="expensesContainerOverview" class="space-y-2.5 sm:space-y-3 min-h-[140px]">
+            <p class="text-slate-500 text-xs sm:text-sm font-medium">No expenses yet. So thrifty! 🤑</p>
+          </div>
+        </div>
+
+        <div class="glass-card rounded-3xl p-5 sm:p-7 shadow-xl card-hover">
+          <div class="flex items-center justify-between mb-5">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                <i class="fa-solid fa-gavel text-sm sm:text-base"></i>
+              </div>
+              <div>
+                <h2 class="font-bold text-base sm:text-lg text-white">Reminders Corner 🌼</h2>
+                <p class="text-[11px] sm:text-xs text-slate-400">Fines that can still be settled</p>
+              </div>
+            </div>
+            <button onclick="promptPasscodeAction('addFine')" class="text-xs bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 px-3 py-1.5 sm:py-2 rounded-xl transition font-bold flex items-center gap-1.5 active:scale-95">
+              <i class="fa-solid fa-plus text-[10px]"></i> Add Fine
+            </button>
+          </div>
+          <div id="finesContainerOverview" class="space-y-2.5 sm:space-y-3 min-h-[140px]">
+            <p class="text-slate-500 text-xs sm:text-sm font-medium">No pending fines! What a well-behaved class 😇</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: 48 STUDENT BANK ACCOUNTS -->
+    <div id="tabContent-accounts" class="hidden space-y-6">
+      <div class="glass-card rounded-3xl p-5 sm:p-8 shadow-xl border border-cyan-500/30">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-bold text-lg sm:text-xl text-white">48 Student Vaults 🔐 (₱5 Friday Dues)</h2>
+              <span class="bg-cyan-500/20 text-cyan-400 text-[10px] font-black px-2.5 py-0.5 rounded-full border border-cyan-500/30">Auto ₱5 Deduct Every Friday</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-1">Everyone's balance lives here. Every Friday, ₱5 is deducted automatically, so keep that wallet ready! 😉</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="promptPasscodeAction('undoVaultAction')" class="bg-amber-600/30 hover:bg-amber-600/40 text-amber-300 border border-amber-500/40 text-xs font-bold px-3 py-2 rounded-xl transition shadow-md flex items-center gap-1.5 active:scale-95">
+              <i class="fa-solid fa-rotate-left text-xs"></i> Oops, Undo! ↩️
+            </button>
+            <button onclick="promptPasscodeAction('batchAddAdvance')" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow-lg transition active:scale-95">
+              <i class="fa-solid fa-plus-circle"></i> Advance for Everyone 🎁
+            </button>
+            <button onclick="promptPasscodeAction('batchDeduct')" class="bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-md flex items-center gap-1.5 active:scale-95">
+              <i class="fa-solid fa-minus-circle text-[10px]"></i> Deduct from Everyone
+            </button>
+            <button onclick="promptPasscodeAction('resetAllAccounts')" class="bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/40 text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-md flex items-center gap-1.5 active:scale-95">
+              <i class="fa-solid fa-arrow-rotate-left text-[10px]"></i> Reset All
+            </button>
+            <button onclick="promptPasscodeAction('forceFridaySync')" class="bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl transition active:scale-95">
+              <i class="fa-solid fa-rotate text-[10px]"></i> Friday Sync Now 🔄
+            </button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+        <div class="rounded-2xl border-2 border-emerald-400/50 bg-emerald-500/10 p-4 flex items-center gap-3">
+          <div class="text-3xl">🪙</div>
+          <div class="min-w-0">
+            <p class="text-[11px] uppercase tracking-wider font-bold text-emerald-300">Total contributions as of now</p>
+            <div id="vaultTotalContrib" class="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">₱0.00</div>
+            <p id="vaultTotalSub" class="text-[11px] text-slate-400"></p>
+          </div>
+          <button onclick="promptPasscodeAction('editContributions')" title="Edit total contributions" class="ml-auto flex-shrink-0 bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/40 text-xs font-bold px-3 py-2 rounded-xl active:scale-95">✏️ Edit</button>
+        </div>
+        <div class="rounded-2xl border-2 border-amber-400/50 bg-amber-500/10 p-4 flex items-center gap-3">
+          <div class="text-3xl">🌼</div>
+          <div class="min-w-0">
+            <p class="text-[11px] uppercase tracking-wider font-bold text-amber-300">Unpaid dues</p>
+            <div id="vaultUnpaidTotal" class="text-2xl sm:text-3xl font-black text-amber-400 tracking-tight">₱0.00</div>
+          </div>
+        </div>
+        </div>
+        <div id="vaultSearchRow" class="flex items-center gap-2 mb-2">
+          <div class="relative flex-1 min-w-0">
+            <input id="vaultSearch" type="text" autocomplete="off" oninput="applyVaultFilter()" placeholder="🔍 Search your name or vault #..." class="w-full bg-slate-950 border-2 border-slate-800 rounded-2xl pl-4 pr-10 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500">
+            <button onclick="clearVaultSearch()" title="Clear" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white px-2 py-1 text-xs">✕</button>
+          </div>
+          <button id="vaultShowAllBtn" onclick="toggleShowAllVaults()" class="whitespace-nowrap bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 text-xs font-bold px-3 py-2.5 rounded-2xl active:scale-95">Show all 48</button>
+        </div>
+        <p id="vaultCount" class="text-[11px] text-slate-500 mb-3 px-1"></p>
+        <p id="vaultHint" class="text-sm text-slate-400 text-center py-6 hidden"></p>
+        <div id="studentAccountsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"></div>
+      </div>
+    </div>
+
+    <!-- TAB 2: EXPENSES FEED CONTENT -->
+    <div id="tabContent-expenses" class="hidden space-y-6">
+      <div class="glass-card rounded-3xl p-5 sm:p-8 shadow-xl border border-cyan-500/30">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="font-bold text-lg sm:text-xl text-white">Expense Tracker 🧾</h2>
+            <p class="text-xs text-slate-400">Newest first, so nothing slips through</p>
+          </div>
+          <button onclick="promptPasscodeAction('addExpense')" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-lg active:scale-95">
+            <i class="fa-solid fa-plus text-[10px]"></i> Log Expense
+          </button>
+        </div>
+        <div id="expensesContainerFull" class="space-y-3"></div>
+      </div>
+    </div>
+
+    <!-- TAB 3: PENALTIES / FINES CONTENT -->
+    <div id="tabContent-fines" class="hidden space-y-6">
+      <div class="glass-card rounded-3xl p-5 sm:p-8 shadow-xl border border-rose-500/30">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="font-bold text-lg sm:text-xl text-white">Reminders & Fines 🌼</h2>
+            <p class="text-xs text-slate-400">Late, no ID, or forgot something? It happens! We sort it out here, no stress 💛</p>
+          </div>
+          <button onclick="promptPasscodeAction('addFine')" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-lg active:scale-95">
+            <i class="fa-solid fa-plus text-[10px]"></i> Add Fine
+          </button>
+        </div>
+        <div id="finesContainerFull" class="space-y-3"></div>
+      </div>
+    </div>
+
+    <!-- TAB 4: DUES LOG CONTENT -->
+    <div id="tabContent-dues" class="hidden space-y-6">
+      <div class="glass-card rounded-3xl p-5 sm:p-8 shadow-xl border border-emerald-500/30">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="font-bold text-lg sm:text-xl text-white">Revenue History 💰</h2>
+            <p id="revenueTotal" class="text-xs font-bold text-emerald-400 mb-0.5"></p>
+            <p class="text-xs text-slate-400">Money our store made — name each sale so everyone knows where it came from!</p>
+          </div>
+          <button onclick="promptPasscodeAction('addDues')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-lg active:scale-95">
+            <i class="fa-solid fa-plus text-[10px]"></i> Record Revenue
+          </button>
+        </div>
+        <div id="duesContainerFull" class="space-y-3"></div>
+      </div>
+    </div>
+
+    <!-- TAB 5: THREADS / SUGGESTIONS CONTENT -->
+    <div id="tabContent-suggestions" class="hidden space-y-6">
+      <div class="glass-card rounded-3xl p-5 sm:p-8 shadow-xl border border-cyan-500/30 space-y-6">
+        <div>
+          <h2 class="font-bold text-lg sm:text-xl text-white">Chika Corner 💬</h2>
+          <p class="text-xs text-slate-400">Got an idea? A complaint? A hugot? Post it!</p>
+        </div>
+
+        <form onsubmit="submitSuggestion(event)" class="bg-slate-950/80 rounded-2xl p-4 border border-slate-800 space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input type="text" id="suggAuthor" placeholder="Your name or @handle" required class="bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+            <select id="suggCategory" class="bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-300 focus:outline-none focus:border-cyan-500">
+              <option value="Idea">💡 Class Idea</option>
+              <option value="Budget Request">💰 Budget Request</option>
+              <option value="Feedback">📝 Feedback</option>
+              <option value="Announcement">📢 Announcement</option>
+            </select>
+          </div>
+          <textarea id="suggText" rows="2" placeholder="What's the chika? Ideas, hugot, complaints... anything goes! ✨" required class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-cyan-500 resize-none"></textarea>
+          <div class="flex justify-end">
+            <button type="submit" class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-md hover:from-cyan-400 hover:to-blue-500 transition">
+              <i class="fa-solid fa-paper-plane text-[10px]"></i> Post it! 🚀
+            </button>
+          </div>
+        </form>
+
+        <div class="space-y-3">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-thumbtack rotate-45"></i> Pinned Threads
+          </h3>
+          <div id="pinnedSuggestionsContainer" class="space-y-3"></div>
+        </div>
+
+        <div class="space-y-3 pt-2">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">All Recent Threads</h3>
+          <div id="suggestionsContainerFull" class="space-y-3"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="max-w-7xl mx-auto px-4 sm:px-6 mt-16 text-center text-xs text-slate-500 space-y-1">
+    <p class="font-semibold text-slate-400">Central Bank of Acad H(ets) 🏦 It's our money, let's look after it!</p>
+    <p>Made with 💙 (and a little kaba) for the class. No secrets with the money here!</p>
+  </footer>
+
+  <!-- WORDED PASSCODE VERIFICATION MODAL -->
+  <div id="passcodeModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="glass-card rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl border border-cyan-500/30">
+      <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-4 mx-auto">
+        <i class="fa-solid fa-user-shield text-lg sm:text-xl"></i>
+      </div>
+      <h3 class="text-lg sm:text-xl font-bold text-center text-white">Psst, Officers only! 🕵️</h3>
+      <p class="text-xs text-center text-slate-400 mt-1 mb-5">Officers only! Pick your position and enter the secret passcode 🤫</p>
+      <label class="block text-xs font-semibold text-slate-400 mb-1">Your officer position</label>
+      <select id="officerSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 mb-3">
+        <option value="">Select position...</option>
+        <option value="President">President</option>
+        <option value="Vice President">Vice President</option>
+        <option value="Secretary">Secretary</option>
+        <option value="Treasurer">Treasurer</option>
+        <option value="Auditor">Auditor</option>
+        <option value="Business Manager">Business Manager</option>
+      </select>
+      <input type="password" id="passcodeInput" placeholder="Enter worded passcode..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 mb-5">
+      <div class="flex justify-end gap-2.5">
+        <button onclick="closePasscodeModal()" class="w-1/2 py-2 text-xs font-semibold text-slate-400 hover:text-white bg-slate-800/50 rounded-xl border border-slate-700/50 transition">Cancel</button>
+        <button onclick="submitPasscodeVerification()" class="w-1/2 py-2 text-xs font-semibold bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl transition shadow-lg shadow-cyan-950/50">Verify</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASSCODE SETTINGS MODAL -->
+  <div id="settingsModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="glass-card rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl border border-cyan-500/30">
+      <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-3 sm:mb-4 mx-auto">
+        <i class="fa-solid fa-key text-lg sm:text-xl"></i>
+      </div>
+      <h3 class="text-lg sm:text-xl font-bold text-center text-white">Change Passcode</h3>
+      <p class="text-xs text-center text-slate-400 mt-1 mb-5">Change the officers' passcode. (The class password has its own 🔒 menu.)</p>
+      
+      <label class="block text-xs font-semibold text-slate-400 mb-1">Current Passcode</label>
+      <label class="block text-xs font-semibold text-slate-400 mb-1">Your officer position</label>
+      <select id="officerSelectSt" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 mb-3">
+        <option value="">Select position...</option>
+        <option value="President">President</option>
+        <option value="Vice President">Vice President</option>
+        <option value="Secretary">Secretary</option>
+        <option value="Treasurer">Treasurer</option>
+        <option value="Auditor">Auditor</option>
+        <option value="Business Manager">Business Manager</option>
+      </select>
+      <input type="password" id="oldPasscode" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-100 mb-3 focus:outline-none focus:border-cyan-500">
+      
+      <label class="block text-xs font-semibold text-slate-400 mb-1">New Worded Passcode</label>
+      <input type="password" id="newPasscode" placeholder="e.g. SecretPhrase2026" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-100 mb-3 focus:outline-none focus:border-cyan-500">
+      
+      <label class="block text-xs font-semibold text-slate-400 mb-1">Confirm New Passcode</label>
+      <input type="password" id="confirmPasscode" placeholder="Re-type new passcode" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-100 mb-5 focus:outline-none focus:border-cyan-500">
+
+      <div class="flex justify-end gap-2.5">
+        <button onclick="closeSettingsModal()" class="w-1/2 py-2 text-xs font-semibold text-slate-400 hover:text-white bg-slate-800/50 rounded-xl border border-slate-700/50 transition">Cancel</button>
+        <button onclick="saveNewPasscode()" class="w-1/2 py-2 text-xs font-semibold bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl transition shadow-lg shadow-cyan-950/50">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLASS PASSWORD OPTIONS MODAL -->
+  <div id="classPwModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div class="glass-card rounded-3xl p-6 sm:p-7 max-w-sm w-full max-h-[92vh] overflow-y-auto shadow-2xl">
+      <div class="text-4xl text-center mb-1">🔒</div>
+      <h3 class="text-lg sm:text-xl font-bold text-center text-white">Class Password</h3>
+      <p class="text-xs text-center text-slate-400 mt-1 mb-4">Decide who gets into the site. Enter the officers' passcode (and pick your position) to make changes.</p>
+
+      <label class="block text-xs font-semibold text-slate-400 mb-1">Officers' Passcode</label>
+      <label class="block text-xs font-semibold text-slate-400 mb-1">Your officer position</label>
+      <select id="officerSelectCp" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500 mb-3">
+        <option value="">Select position...</option>
+        <option value="President">President</option>
+        <option value="Vice President">Vice President</option>
+        <option value="Secretary">Secretary</option>
+        <option value="Treasurer">Treasurer</option>
+        <option value="Auditor">Auditor</option>
+        <option value="Business Manager">Business Manager</option>
+      </select>
+      <input type="password" id="cpAuth" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-100 mb-4 focus:outline-none focus:border-cyan-500">
+
+      <div class="border-t border-slate-800 pt-3 mb-3">
+        <p class="text-xs font-bold text-cyan-300 mb-2">Option 1: Set a new class password</p>
+        <input type="password" id="cpNew" placeholder="New class password (min. 4 characters)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-100 mb-2 focus:outline-none focus:border-cyan-500">
+        <input type="password" id="cpConfirm" placeholder="Confirm new class password" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-100 mb-2 focus:outline-none focus:border-cyan-500">
+        <label class="flex items-center gap-2 text-[11px] text-slate-400 mb-3"><input id="cpShow" type="checkbox" onchange="toggleClassPwVisibility()" class="accent-cyan-500"> Show what I'm typing</label>
+        <button onclick="saveClassPassword()" class="w-full py-2 text-xs font-semibold bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl shadow-lg">Save new class password</button>
+      </div>
+
+      <div class="border-t border-slate-800 pt-3 mb-3">
+        <p class="text-xs font-bold text-cyan-300 mb-2">Option 2: Reset to the default password</p>
+        <button onclick="resetClassPassword()" class="w-full py-2 text-xs font-semibold text-amber-300 bg-amber-600/20 border border-amber-500/40 rounded-xl">Reset to default (acadh2026)</button>
+      </div>
+
+      <div class="border-t border-slate-800 pt-3 mb-4">
+        <p class="text-xs font-bold text-cyan-300 mb-2">Option 3: Lock this device</p>
+        <button onclick="lockThisDevice()" class="w-full py-2 text-xs font-semibold text-slate-200 bg-slate-800 border border-slate-700 rounded-xl">Lock now (password needed again)</button>
+      </div>
+
+      <button onclick="closeClassPwModal()" class="w-full py-2 text-xs font-semibold text-slate-400 hover:text-white bg-slate-800/50 rounded-xl border border-slate-700/50 transition">Close</button>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // -----------------------------------------------------------------
+    // MEDICAL TRIVIA DATA & CYCLING ENGINE
+    // -----------------------------------------------------------------
+    const medicalFunFacts = [
+      "Your heart beats about 100,000 times a day, pumping around 2,000 gallons of blood throughout your body!",
+      "Human bones are about 4 times stronger than concrete, pound for pound!",
+      "The human brain can generate enough electrical power to light a small LED bulb (about 12 to 25 watts).",
+      "Corneas are the only tissue in the human body that doesn't contain blood vessels—they get oxygen directly from the air!",
+      "A single drop of human blood contains roughly 5 million red blood cells and 10,000 white blood cells.",
+      "The stomach acid in your belly (hydrochloric acid) is strong enough to dissolve zinc metal!",
+      "Nerve impulses travel to and from the brain at speeds up to 274 km/h (170 mph)!",
+      "Your body produces about 25 million new cells every second—that's more than the entire population of Australia!",
+      "The human body has about 60,000 miles of blood vessels. Wrapped end to end, they could circle the Earth twice!"
+    ];
+
+    let currentFactIndex = 0;
+
+    function updateGreetingAndClock() {
+      const now = new Date();
+      const hours = now.getHours();
+      let greeting = "Hello, Alipin ng STEM!";
+      let iconClass = "fa-solid fa-sun text-yellow-300";
+
+      if (hours >= 5 && hours < 12) {
+        greeting = "Good morning, Alipin ng STEM! Coffee first ☕";
+        iconClass = "fa-solid fa-sun text-amber-300";
+      } else if (hours >= 12 && hours < 18) {
+        greeting = "Hello, Alipin ng STEM! Still surviving? 😎";
+        iconClass = "fa-solid fa-cloud-sun text-cyan-300";
+      } else {
+        greeting = "Good evening, Alipin ng STEM! Review mode on 🌙";
+        iconClass = "fa-solid fa-moon text-indigo-300";
+      }
+
+      const stemGreetingEl = document.getElementById('stemGreeting');
+      if (stemGreetingEl) {
+        stemGreetingEl.innerHTML = `${greeting} <span class="animate-pulse">🩺</span>`;
+      }
+      const iconEl = document.getElementById('greetingIcon');
+      if (iconEl) {
+        iconEl.className = iconClass;
+      }
+
+      const clockEl = document.getElementById('liveClock');
+      if (clockEl) {
+        clockEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      }
+    }
+
+    function displayFunFact() {
+      const textEl = document.getElementById('funFactText');
+      if (textEl) {
+        textEl.style.opacity = 0;
+        setTimeout(() => {
+          textEl.textContent = `"${medicalFunFacts[currentFactIndex]}"`;
+          textEl.style.opacity = 1;
+        }, 200);
+      }
+      
+      const bar = document.getElementById('factProgressBar');
+      if (bar) {
+        bar.classList.remove('animate-progress');
+        void bar.offsetWidth;
+        bar.classList.add('animate-progress');
+      }
+    }
+
+    function nextFunFact() {
+      currentFactIndex = (currentFactIndex + 1) % medicalFunFacts.length;
+      displayFunFact();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      updateGreetingAndClock();
+      setInterval(updateGreetingAndClock, 1000);
+      displayFunFact();
+      setInterval(nextFunFact, 60000);
+    });
+
+    // -----------------------------------------------------------------
+    // FIREBASE INITIALIZATION
+    // -----------------------------------------------------------------
+    const firebaseConfig = {
+      apiKey: "AIzaSyDUbdfoUNPcqPWR46Q9WF1JMF8Q1AkDPJw",
+      authDomain: "acad-ets-finances.firebaseapp.com",
+      databaseURL: "https://acad-ets-finances-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "acad-ets-finances",
+      storageBucket: "acad-ets-finances.firebasestorage.app",
+      messagingSenderId: "360688134857",
+      appId: "1:360688134857:web:5ca03bf2e55a4047dcfb18",
+      measurementId: "G-XK6JTF1RTT"
+    };
+
+    let db;
+    try {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.database();
+    } catch(e) {
+      console.warn("Firebase initialization error:", e);
+    }
+
+    let masterPasscode = localStorage.getItem('treasurerPasscode') || 'treasurer123';
+    let pendingAction = null;
+    let currentOfficer = '';
+    window.byField = () => currentOfficer ? { by: currentOfficer } : {};
+    window.readOfficer = (id) => { const el = document.getElementById(id); const v = el ? el.value : ''; if (!v) { alert('Please pick your officer position first 🙂'); return null; } return v; };
+    // Editing stays unlocked for 5 minutes after a correct passcode (kept in memory only, so closing the tab re-locks it)
+    const UNLOCK_MS = 5 * 60 * 1000;
+    let unlockedUntil = 0;
+    let relockTimer = null;
+    // Big/bulk actions always ask for the passcode, even during the 5 minutes
+    const ALWAYS_ASK = ['clearData', 'resetAllAccounts', 'batchDeduct', 'batchAddAdvance', 'forceFridaySync'];
+
+    // Make functions explicit and globally accessible
+    window.switchTab = function(tabId) {
+      ['overview', 'accounts', 'expenses', 'fines', 'dues', 'suggestions'].forEach(id => {
+        const contentEl = document.getElementById(`tabContent-${id}`);
+        if (contentEl) contentEl.classList.add('hidden');
+        const btn = document.getElementById(`tabBtn-${id}`);
+        if (btn) btn.className = "px-3 sm:px-4 py-2 text-xs font-semibold rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-all flex items-center gap-1.5 flex-shrink-0";
+      });
+      const activeContent = document.getElementById(`tabContent-${tabId}`);
+      if (activeContent) activeContent.classList.remove('hidden');
+      const activeBtn = document.getElementById(`tabBtn-${tabId}`);
+      if (activeBtn) activeBtn.className = "px-3 sm:px-4 py-2 text-xs font-bold rounded-xl bg-cyan-600 text-white shadow-md shadow-cyan-950 transition-all flex items-center gap-1.5 flex-shrink-0";
+    };
+
+    window.promptPasscodeAction = function(actionName) {
+      const mustAsk = ALWAYS_ASK.includes(actionName) || actionName.startsWith('toggleFinePaid_');
+      if (Date.now() < unlockedUntil && !mustAsk) {
+        window.executeProtectedAction(actionName);
+        return;
+      }
+      pendingAction = actionName;
+      const inputEl = document.getElementById('passcodeInput');
+      if (inputEl) inputEl.value = '';
+      const offEl = document.getElementById('officerSelect'); if (offEl) offEl.value = '';
+      const modalEl = document.getElementById('passcodeModal');
+      if (modalEl) modalEl.classList.remove('hidden');
+    };
+
+    window.closePasscodeModal = function() {
+      const modalEl = document.getElementById('passcodeModal');
+      if (modalEl) modalEl.classList.add('hidden');
+      pendingAction = null;
+    };
+
+    window.submitPasscodeVerification = function() {
+      const inputEl = document.getElementById('passcodeInput');
+      const entered = inputEl ? inputEl.value.trim() : '';
+      const officer = window.readOfficer('officerSelect');
+      if (!officer) return;
+      if (entered.toLowerCase() === masterPasscode.toLowerCase()) {
+        currentOfficer = officer;
+        const actionToRun = pendingAction;
+        unlockedUntil = Date.now() + UNLOCK_MS;
+        clearTimeout(relockTimer);
+        relockTimer = setTimeout(() => { if (window.showToast) showToast('🔒 Editing is locked again. The passcode will be asked next time.'); }, UNLOCK_MS);
+        if (window.showToast) showToast('🔓 Unlocked for 5 minutes as ' + officer);
+        window.closePasscodeModal();
+        window.executeProtectedAction(actionToRun);
+      } else {
+        alert("Oops, wrong passcode! Try again 😅");
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const pi = document.getElementById('passcodeInput');
+      if (pi) pi.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') window.submitPasscodeVerification(); });
+    });
+
+    window.escapeHtml = function(v) {
+      return String(v === undefined || v === null ? '' : v)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    };
+
+    window.openPasscodeSettings = function() {
+      document.getElementById('oldPasscode').value = ''; document.getElementById('officerSelectSt').value = '';
+      document.getElementById('newPasscode').value = '';
+      document.getElementById('confirmPasscode').value = '';
+      document.getElementById('settingsModal').classList.remove('hidden');
+    };
+
+    window.closeSettingsModal = function() {
+      document.getElementById('settingsModal').classList.add('hidden');
+    };
+
+    window.saveNewPasscode = function() {
+      const oldVal = document.getElementById('oldPasscode').value.trim();
+      const newVal = document.getElementById('newPasscode').value.trim();
+      const confirmVal = document.getElementById('confirmPasscode').value.trim();
+      const officerSt = window.readOfficer('officerSelectSt'); if (!officerSt) return;
+      if (oldVal.toLowerCase() !== masterPasscode.toLowerCase()) { alert("Current passcode is incorrect!"); return; }
+      if (!newVal) { alert("Please enter a valid new passcode."); return; }
+      if (newVal !== confirmVal) { alert("New passcode and Confirm passcode do not match!"); return; }
+      currentOfficer = officerSt;
+      masterPasscode = newVal;
+      localStorage.setItem('treasurerPasscode', masterPasscode);
+      if (db) db.ref('config/passcode').set(masterPasscode);
+      alert("Passcode updated! 🔑");
+      window.closeSettingsModal();
+    };
+
+    // Advance deducted -> moves into the student's contributions. Paying off a negative balance also counts as contributing.
+    const r2 = x => Math.round(x * 100) / 100;
+    window.calcDeduct = function(acc, amt) {
+      const bal = parseFloat(acc && acc.balance) || 0, con = parseFloat(acc && acc.contributed) || 0;
+      const covered = Math.min(amt, Math.max(bal, 0));
+      return { balance: r2(bal - amt), contributed: r2(con + covered) };
+    };
+    window.calcDeposit = function(acc, amt) {
+      const bal = parseFloat(acc && acc.balance) || 0, con = parseFloat(acc && acc.contributed) || 0;
+      const repay = amt > 0 ? Math.min(amt, Math.max(-bal, 0)) : 0;
+      return { balance: r2(bal + amt), contributed: r2(con + repay) };
+    };
+
+    window.logPaidUnpaid = function(oldAcc, r, accKey) {
+      const paid = r2(r.contributed - (parseFloat(oldAcc && oldAcc.contributed) || 0));
+      if (paid > 0 && db) {
+        const nm = (oldAcc && oldAcc.name) || accKey.replace('acc_', 'Student ');
+        db.ref('dues').push({ ts: Date.now(), type: 'vault', ...window.byField(), amount: paid, date: `Paid unpaid dues: ${nm} (${window.localDateStr()})` });
+      }
+    };
+
+    window.saveVaultHistorySnapshot = function() {
+      if (!db) return;
+      db.ref('accounts').once('value', snapshot => {
+        const accounts = snapshot.val() || {};
+        db.ref('lastVaultState').set(accounts);
+      });
+    };
+
+    window.checkFridayDeduction = function(manualTrigger = false) {
+      if (!db) return;
+      const now = new Date();
+      const dayOfWeek = now.getDay();
+      const pad = n => String(n).padStart(2, '0');
+      const todayDateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
+      if (dayOfWeek !== 5 && !manualTrigger) return;
+
+      const runDeduction = () => {
+        db.ref('accounts').once('value', accountsSnap => {
+          const accounts = accountsSnap.val() || {};
+          let updates = {};
+          let totalCollectedThisFriday = 0, fullPaidCount = 0;
+          for (let i = 1; i <= 48; i++) {
+            const accKey = `acc_${i}`;
+            const r = window.calcDeduct(accounts[accKey], 5);
+            updates[`accounts/${accKey}/balance`] = r.balance;
+            updates[`accounts/${accKey}/contributed`] = r.contributed;
+            { const got = Math.min(5, Math.max(parseFloat(accounts[accKey] && accounts[accKey].balance) || 0, 0)); totalCollectedThisFriday += got; if (got >= 5) fullPaidCount++; }
+          }
+          db.ref().update(updates, (err) => {
+            if (!err) {
+              if (totalCollectedThisFriday > 0) db.ref('dues').push({
+                ts: Date.now(),
+                type: 'vault',
+                paidCount: fullPaidCount,
+                ...(manualTrigger ? window.byField() : { by: 'Auto' }),
+                amount: totalCollectedThisFriday,
+                date: `Friday Auto-Deduct (${todayDateStr})`
+              });
+              if (manualTrigger) alert(`Friday ₱5 deduction processed. Collected ₱${totalCollectedThisFriday.toFixed(2)}; ₱${(240 - totalCollectedThisFriday).toFixed(2)} is now unpaid dues.`);
+            }
+          });
+        });
+      };
+
+      if (manualTrigger) {
+        if (!confirm("Deduct ₱5 from all 48 accounts right now?")) return;
+        db.ref('lastFridayDeduction').set(todayDateStr);
+        runDeduction();
+        return;
+      }
+
+      // Automatic: claim today's slot atomically so only one visitor ever deducts
+      db.ref('lastFridayDeduction').transaction(current => {
+        if (current === todayDateStr) return; // already done today -> abort
+        return todayDateStr;
+      }, (err, committed) => {
+        if (!err && committed) runDeduction();
+      });
+    };
+
+    window.executeProtectedAction = function(action) {
+      if (!action || !db) return;
+
+      if (action === 'addExpense') {
+        const title = prompt("Expense Description (e.g., Medical Kits, Lab Supplies):");
+        const amount = parseFloat(prompt("Amount in ₱:"));
+        if (title && !isNaN(amount)) {
+          db.ref('expenses').push({ title, amount, date: new Date().toLocaleDateString(), ...window.byField() });
+        }
+      } else if (action === 'addDues') {
+        const name = (prompt("Revenue name (e.g., Milk tea sale, Cookie booth):") || '').trim();
+        if (!name) return;
+        const amount = parseFloat(prompt("Amount made from the store (₱):"));
+        if (!isNaN(amount)) {
+          db.ref('dues').push({ ts: Date.now(), type: 'revenue', name, ...window.byField(), amount, date: new Date().toLocaleDateString() });
+        }
+      } else if (action === 'addToBuy') {
+        const text = (prompt("What needs to be bought? (e.g., Alcohol & tissue for the lab)") || '').trim();
+        if (!text) return;
+        const amtStr = prompt("Estimated cost in ₱ (leave blank if none):", "");
+        const amount = parseFloat(amtStr);
+        const entry = { text, date: new Date().toLocaleDateString(), ts: Date.now(), ...window.byField() };
+        if (!isNaN(amount) && amount >= 0) entry.amount = amount;
+        db.ref('toBuy').push(entry);
+      } else if (action.startsWith('deleteToBuy_')) {
+        if (confirm("Remove this To Buy announcement?")) db.ref(`toBuy/${action.replace('deleteToBuy_', '')}`).remove();
+      } else if (action === 'editProject') {
+        db.ref('nextProject').once('value', snap => {
+          const cur = snap.val() || {};
+          const name = (prompt("Next Project name:", cur.name || '') || '').trim();
+          if (!name) return;
+          const target = prompt("Target date / note (optional, e.g., Nov 28):", cur.target || '');
+          db.ref('nextProject').update({ name, target: (target || '').trim(), ...window.byField() });
+        });
+      } else if (action === 'addProjectItem') {
+        const name = (prompt("Item to buy (e.g., Bond paper):") || '').trim();
+        const qty = parseInt(prompt("Quantity:", "1"), 10);
+        const price = parseFloat(prompt("Price per piece in ₱:"));
+        if (name && qty > 0 && !isNaN(price) && price >= 0) {
+          db.ref('nextProjectItems').push({ name, qty, price, ...window.byField() });
+        }
+      } else if (action.startsWith('editProjectItem_')) {
+        const id = action.replace('editProjectItem_', '');
+        db.ref(`nextProjectItems/${id}`).once('value', snap => {
+          const it = snap.val();
+          if (!it) return;
+          const name = (prompt("Item name:", it.name) || '').trim();
+          const qty = parseInt(prompt("Quantity:", it.qty), 10);
+          const price = parseFloat(prompt("Price per piece in ₱:", it.price));
+          if (name && qty > 0 && !isNaN(price) && price >= 0) db.ref(`nextProjectItems/${id}`).update({ name, qty, price, ...window.byField() });
+        });
+      } else if (action.startsWith('deleteProjectItem_')) {
+        db.ref(`nextProjectItems/${action.replace('deleteProjectItem_', '')}`).remove();
+      } else if (action === 'clearProject') {
+        if (confirm("Clear the Next Project and all its items?")) db.ref().update({ nextProject: null, nextProjectItems: null });
+      } else if (action === 'addFine') {
+        const student = prompt("Student Name:");
+        const reason = prompt("Reason (what is the fine for?):");
+        const amount = parseFloat(prompt("Amount in ₱:"));
+        if (student && reason && !isNaN(amount)) {
+          db.ref('fines').push({ student, reason, amount, paid: false, ...window.byField() });
+        }
+      } else if (action === 'clearData') {
+        if (confirm("Are you sure you want to reset all class database ledger data?")) {
+          db.ref().update({ expenses: null, dues: null, fines: null, suggestions: null, accounts: null, lastVaultState: null, 'config/cashAdjustment': null, 'config/pastContributions': null });
+        }
+      } else if (action === 'batchAddAdvance') {
+        const amt = parseFloat(prompt("Add advance amount (₱) to ALL 48 accounts:", "5"));
+        let batchPaid = 0;
+        if (!isNaN(amt) && amt > 0) {
+          db.ref('accounts').once('value', snapshot => {
+            const accounts = snapshot.val() || {};
+            let updates = {};
+            for (let i = 1; i <= 48; i++) {
+              const accKey = `acc_${i}`;
+              const currentBal = (accounts[accKey] && accounts[accKey].balance) || 0;
+              const r = window.calcDeposit(accounts[accKey], amt);
+              batchPaid += r.contributed - (parseFloat(accounts[accKey] && accounts[accKey].contributed) || 0);
+              updates[`accounts/${accKey}/balance`] = r.balance;
+              updates[`accounts/${accKey}/contributed`] = r.contributed;
+            }
+            db.ref('lastVaultState').set(accounts);
+            db.ref().update(updates);
+            if (batchPaid > 0) db.ref('dues').push({ ts: Date.now(), type: 'vault', ...window.byField(), amount: r2(batchPaid), date: `Paid unpaid dues: everyone (${window.localDateStr()})` });
+          });
+        }
+      } else if (action === 'undoVaultAction') {
+        db.ref('lastVaultState').once('value', snapshot => {
+          const prevState = snapshot.val();
+          if (prevState) {
+            if (confirm("Revert the last vault action (balances & names back to previous state)?")) {
+              db.ref('accounts').set(prevState);
+              db.ref('lastVaultState').remove();
+              alert("Last vault action undone successfully!");
+            }
+          } else {
+            alert("No recent vault action available to undo!");
+          }
+        });
+      } else if (action === 'resetAllAccounts') {
+        if (confirm("Reset ALL 48 student vault balances to ₱0.00? Names are kept, and you can use Undo afterwards.")) {
+          db.ref('accounts').once('value', snapshot => {
+            const accounts = snapshot.val() || {};
+            let updates = {};
+            for (let i = 1; i <= 48; i++) updates[`accounts/acc_${i}/balance`] = 0;
+            db.ref('lastVaultState').set(accounts);
+            db.ref().update(updates);
+            if (window.showToast) showToast('🧹 All vaults reset to ₱0.00');
+          });
+        }
+      } else if (action === 'editCash') {
+        db.ref().once('value', snap => {
+          const d = snap.val() || {};
+          const vals = o => Object.values(o || {});
+          const addUp = (arr) => arr.reduce((a, x) => a + (parseFloat(x.amount) || 0), 0);
+          const base = addUp(vals(d.dues)) + addUp(vals(d.fines).filter(f => f.paid)) - addUp(vals(d.expenses));
+          const adj = parseFloat(d.config && d.config.cashAdjustment) || 0;
+          const cur = base + adj;
+          const input = prompt(`Cash on hand now: ₱${cur.toFixed(2)}\n\nEnter the correct amount:`, cur.toFixed(2));
+          if (input === null) return;
+          const val = parseFloat(input);
+          if (isNaN(val)) { alert("Please enter a valid number."); return; }
+          db.ref('config/cashAdjustment').set(r2(val - base));
+          if (window.showToast) showToast('💵 Cash on hand updated to ₱' + val.toFixed(2));
+        });
+      } else if (action.startsWith('editContributed_')) {
+        const accKey = action.replace('editContributed_', '');
+        db.ref(`accounts/${accKey}`).once('value', snapshot => {
+          const acc = snapshot.val() || {};
+          const nm = acc.name || accKey.replace('acc_', 'Student ');
+          const cur = parseFloat(acc.contributed) || 0;
+          const input = prompt(`Total amount ${nm} has contributed so far (including past contributions) in ₱:`, cur.toFixed(2));
+          if (input === null) return;
+          const val = parseFloat(input);
+          if (isNaN(val) || val < 0) { alert("Please enter a valid amount."); return; }
+          window.saveVaultHistorySnapshot();
+          db.ref(`accounts/${accKey}/contributed`).set(val);
+        });
+      } else if (action === 'editContributions') {
+        db.ref().once('value', snap => {
+          const d = snap.val() || {};
+          const accs = d.accounts || {};
+          let vaultSum = 0;
+          for (let i = 1; i <= 48; i++) { const a = accs[`acc_${i}`] || {}; vaultSum += (parseFloat(a.contributed) || 0) + Math.max(a.balance || 0, 0); }
+          const past = parseFloat(d.config && d.config.pastContributions) || 0;
+          const currentTotal = past + vaultSum;
+          const input = prompt(`Total contributions as of now: ₱${currentTotal.toFixed(2)}\n\nEnter the correct total. Any difference from the students' own amounts is saved as an adjustment:`, currentTotal.toFixed(2));
+          if (input === null) return;
+          const newTotal = parseFloat(input);
+          if (isNaN(newTotal)) { alert("Please enter a valid number."); return; }
+          db.ref('config/pastContributions').set(newTotal - vaultSum);
+          if (window.showToast) showToast('🪙 Total contributions updated to ₱' + newTotal.toFixed(2));
+        });
+      } else if (action.startsWith('deductAccount_')) {
+        const accKey = action.replace('deductAccount_', '');
+        const amt = parseFloat(prompt("Amount to deduct from this vault in ₱:", "5"));
+        if (!isNaN(amt) && amt > 0) {
+          db.ref(`accounts/${accKey}`).once('value', snapshot => {
+            const acc = snapshot.val() || {};
+            const currentBal = acc.balance || 0;
+            const nm = acc.name || accKey.replace('acc_', 'Student ');
+            window.saveVaultHistorySnapshot();
+            const r = window.calcDeduct(acc, amt);
+            db.ref(`accounts/${accKey}`).update({ balance: r.balance, contributed: r.contributed });
+            const covered = r2(Math.min(amt, Math.max(currentBal, 0)));
+            const unpaid = r2(amt - covered);
+            let msg = `Deducted ₱${amt.toFixed(2)} from ${nm}.`;
+            if (unpaid > 0) msg += `\n₱${unpaid.toFixed(2)} of it is now unpaid dues.`;
+            if (covered > 0) {
+              if (confirm(msg + `\n\nAlso record ₱${covered.toFixed(2)} in Collected Contributions as vault payments?`)) {
+                db.ref('dues').push({ ts: Date.now(), type: 'vault', ...window.byField(), amount: covered, date: `Vault deduction: ${nm} (${window.localDateStr()})` });
+              }
+            } else { alert(msg); }
+          });
+        }
+      } else if (action === 'batchDeduct') {
+        const amt = parseFloat(prompt("Amount to deduct from EVERY vault (all 48) in ₱:", "5"));
+        if (!isNaN(amt) && amt > 0 && confirm(`Deduct ₱${amt.toFixed(2)} from all 48 vaults?`)) {
+          db.ref('accounts').once('value', snapshot => {
+            const accounts = snapshot.val() || {};
+            window.saveVaultHistorySnapshot();
+            let updates = {};
+            for (let i = 1; i <= 48; i++) {
+              const k = `acc_${i}`;
+              const r = window.calcDeduct(accounts[k], amt);
+              updates[`accounts/${k}/balance`] = r.balance;
+              updates[`accounts/${k}/contributed`] = r.contributed;
+            }
+            db.ref().update(updates);
+            let covered = 0;
+            for (let i = 1; i <= 48; i++) { const a = accounts[`acc_${i}`]; covered += Math.min(amt, Math.max(parseFloat(a && a.balance) || 0, 0)); }
+            covered = r2(covered);
+            const unpaid = r2(amt * 48 - covered);
+            let msg = `Deducted ₱${amt.toFixed(2)} from every vault.`;
+            if (unpaid > 0) msg += `\n₱${unpaid.toFixed(2)} in total is now unpaid dues.`;
+            if (covered > 0) {
+              if (confirm(msg + `\n\nAlso record ₱${covered.toFixed(2)} in Collected Contributions as vault payments?`)) {
+                db.ref('dues').push({ ts: Date.now(), type: 'vault', ...window.byField(), amount: covered, date: `Vault deduction: everyone (${window.localDateStr()})` });
+              }
+            } else { alert(msg); }
+            if (window.showToast) showToast('➖ Deducted ₱' + amt.toFixed(2) + ' from every vault');
+          });
+        }
+      } else if (action === 'forceFridaySync') {
+        window.checkFridayDeduction(true);
+      } else if (action.startsWith('toggleFinePaid_')) {
+        const id = action.replace('toggleFinePaid_', '');
+        db.ref(`fines/${id}/paid`).once('value', snapshot => {
+          db.ref(`fines/${id}`).update({ paid: !snapshot.val(), paidBy: !snapshot.val() ? (currentOfficer || null) : null });
+        });
+      } else if (action.startsWith('editAccountName_')) {
+        const accKey = action.replace('editAccountName_', '');
+        db.ref(`accounts/${accKey}`).once('value', snapshot => {
+          const acc = snapshot.val() || {};
+          const newName = prompt("Edit Student Name:", acc.name || `Student ${accKey.replace('acc_', '')}`);
+          if (newName) {
+            window.saveVaultHistorySnapshot();
+            db.ref(`accounts/${accKey}/name`).set(newName);
+          }
+        });
+      } else if (action.startsWith('addAdvance_')) {
+        const accKey = action.replace('addAdvance_', '');
+        const amt = parseFloat(prompt("Add advance payment amount in ₱:", "5"));
+        if (!isNaN(amt)) {
+          window.saveVaultHistorySnapshot();
+          db.ref(`accounts/${accKey}`).once('value', snapshot => {
+            const r = window.calcDeposit(snapshot.val(), amt);
+            db.ref(`accounts/${accKey}`).update({ balance: r.balance, contributed: r.contributed });
+            window.logPaidUnpaid(snapshot.val(), r, accKey);
+          });
+        }
+      } else if (action.startsWith('customAdvance_')) {
+        const accKey = action.replace('customAdvance_', '');
+        const amt = parseFloat(prompt("Enter custom advance/deposit amount in ₱:", "10"));
+        if (!isNaN(amt) && amt !== 0) {
+          window.saveVaultHistorySnapshot();
+          db.ref(`accounts/${accKey}`).once('value', snapshot => {
+            const r = window.calcDeposit(snapshot.val(), amt);
+            db.ref(`accounts/${accKey}`).update({ balance: r.balance, contributed: r.contributed });
+            window.logPaidUnpaid(snapshot.val(), r, accKey);
+          });
+        }
+      } else if (action.startsWith('resetAccount_')) {
+        const accKey = action.replace('resetAccount_', '');
+        if (confirm("Reset this student's vault balance back to ₱0.00?")) {
+          window.saveVaultHistorySnapshot();
+          db.ref(`accounts/${accKey}/balance`).set(0);
+        }
+      } else if (action.startsWith('editExpense_')) {
+        const id = action.replace('editExpense_', '');
+        db.ref(`expenses/${id}`).once('value', snapshot => {
+          const item = snapshot.val();
+          if (item) {
+            const newTitle = prompt("Edit Expense Description:", item.title);
+            const newAmount = parseFloat(prompt("Edit Amount in ₱:", item.amount));
+            if (newTitle && !isNaN(newAmount)) {
+              db.ref(`expenses/${id}`).update({ title: newTitle, amount: newAmount, editedBy: currentOfficer || null });
+            }
+          }
+        });
+      } else if (action.startsWith('deleteExpense_')) {
+        const id = action.replace('deleteExpense_', '');
+        db.ref(`expenses/${id}`).remove();
+      } else if (action.startsWith('editFine_')) {
+        const id = action.replace('editFine_', '');
+        db.ref(`fines/${id}`).once('value', snapshot => {
+          const item = snapshot.val();
+          if (item) {
+            const newStudent = prompt("Edit Student Name:", item.student);
+            const newReason = prompt("Edit Reason (what is the fine for?):", item.reason);
+            const newAmount = parseFloat(prompt("Edit Amount in ₱:", item.amount));
+            if (newStudent && newReason && !isNaN(newAmount)) {
+              db.ref(`fines/${id}`).update({ student: newStudent, reason: newReason, amount: newAmount, editedBy: currentOfficer || null });
+            }
+          }
+        });
+      } else if (action.startsWith('deleteFine_')) {
+        const id = action.replace('deleteFine_', '');
+        db.ref(`fines/${id}`).remove();
+      } else if (action.startsWith('editDues_')) {
+        const id = action.replace('editDues_', '');
+        db.ref(`dues/${id}`).once('value', snapshot => {
+          const item = snapshot.val();
+          if (item) {
+            const newName = (prompt("Edit Revenue Name:", item.name || 'Store Revenue') || '').trim();
+            if (!newName) return;
+            const newAmount = parseFloat(prompt("Edit Revenue Amount in ₱:", item.amount));
+            if (!isNaN(newAmount)) {
+              db.ref(`dues/${id}`).update({ name: newName, amount: newAmount, editedBy: currentOfficer || null });
+            }
+          }
+        });
+      } else if (action.startsWith('deleteDues_')) {
+        const id = action.replace('deleteDues_', '');
+        db.ref(`dues/${id}`).remove();
+      } else if (action.startsWith('togglePinSuggestion_')) {
+        const id = action.replace('togglePinSuggestion_', '');
+        db.ref(`suggestions/${id}/pinned`).once('value', snapshot => {
+          const currentPinned = snapshot.val() || false;
+          db.ref(`suggestions/${id}`).update({ pinned: !currentPinned, pinnedBy: !currentPinned ? (currentOfficer || null) : null });
+        });
+      } else if (action.startsWith('editSuggestion_')) {
+        const id = action.replace('editSuggestion_', '');
+        db.ref(`suggestions/${id}`).once('value', snapshot => {
+          const item = snapshot.val();
+          if (item) {
+            const newText = prompt("Edit Thread Content:", item.text);
+            if (newText) {
+              db.ref(`suggestions/${id}`).update({ text: newText });
+            }
+          }
+        });
+      } else if (action.startsWith('deleteSuggestion_')) {
+        const id = action.replace('deleteSuggestion_', '');
+        db.ref(`suggestions/${id}`).remove();
+      }
+    };
+
+    window.submitSuggestion = function(e) {
+      e.preventDefault();
+      let author = document.getElementById('suggAuthor').value.trim().replace(/^@/, '');
+      const category = document.getElementById('suggCategory').value;
+      const text = document.getElementById('suggText').value.trim();
+
+      if (author && text && db) {
+        db.ref('suggestions').push({
+          author: '@' + author,
+          category,
+          text,
+          upvotes: 0,
+          pinned: false,
+          date: new Date().toLocaleDateString() + ' • ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+        document.getElementById('suggText').value = '';
+      }
+    };
+
+    window.upvoteSuggestion = function(id, currentVotes) {
+      if (db) {
+        db.ref(`suggestions/${id}/upvotes`).set((currentVotes || 0) + 1);
+      }
+    };
+
+    window.getAvatarColor = function(name) {
+      const colors = ['bg-cyan-500', 'bg-blue-600', 'bg-indigo-600', 'bg-sky-500', 'bg-teal-500'];
+      let hash = 0;
+      for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
+      return colors[Math.abs(hash) % colors.length];
+    };
+
+    window.exportDataJSON = function() {
+      if (!db) return;
+      db.ref().once('value', snapshot => {
+        const data = snapshot.val() || {};
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "central_bank_acad_h_backup.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+      });
+    };
+
+    // LIVE DATABASE SNAPSHOT LISTENER
+    if (db) {
+      db.ref().on('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        const expensesObj = data.expenses || {};
+        const duesObj = data.dues || {};
+        const finesObj = data.fines || {};
+        const suggestionsObj = data.suggestions || {};
+        const accountsObj = data.accounts || {};
+
+        if (data.config && data.config.passcode) {
+          masterPasscode = data.config.passcode;
+          localStorage.setItem('treasurerPasscode', masterPasscode);
+        }
+
+        const expenses = Object.entries(expensesObj).map(([id, val]) => ({ id, ...val })).reverse();
+        const dues = Object.entries(duesObj).map(([id, val]) => ({ id, ...val })).reverse();
+        const fines = Object.entries(finesObj).map(([id, val]) => ({ id, ...val })).reverse();
+        const suggestions = Object.entries(suggestionsObj).map(([id, val]) => ({ id, ...val })).reverse();
+
+        // Calculate Totals
+        const totalSpent = expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+        const totalDues = dues.reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);
+        const paidFines = fines.filter(f => f.paid).reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0);
+        const pendingFines = fines.filter(f => !f.paid).reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0);
+        const totalCollected = totalDues + paidFines;
+        const currentBalance = totalCollected - totalSpent;
+
+        const cashAdj = parseFloat(data.config && data.config.cashAdjustment) || 0;
+        document.getElementById('statBalance').textContent = `₱${(currentBalance + cashAdj).toFixed(2)}`;
+        document.getElementById('statCollected').textContent = `₱${totalCollected.toFixed(2)}`;
+        document.getElementById('statSpent').textContent = `₱${totalSpent.toFixed(2)}`;
+        document.getElementById('statPendingFines').textContent = `₱${pendingFines.toFixed(2)}`;
+
+        // RENDER 48 STUDENT ACCOUNTS GRID
+        let accountsGridHtml = '';
+        let totalVaultBal = 0, advCount = 0, topUpCount = 0, totalContributed = 0, totalAdvance = 0, totalUnpaid = 0;
+        for (let i = 1; i <= 48; i++) {
+          const accKey = `acc_${i}`;
+          const accData = accountsObj[accKey] || { name: `Student ${i}`, balance: 0 };
+          const name = accData.name || `Student ${i}`;
+          const bal = accData.balance || 0;
+          totalVaultBal += bal; if (bal > 0) advCount++; if (bal < 0) topUpCount++;
+          const contrib = parseFloat(accData.contributed) || 0; totalContributed += contrib; totalAdvance += Math.max(bal, 0); if (bal < 0) totalUnpaid += -bal;
+          
+          let statusBadge = '<span class="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-bold">Advance! 🤑</span>';
+          if (bal < 0) {
+            statusBadge = '<span class="text-[9px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded-full font-bold">Unpaid dues 🌼</span>';
+          } else if (bal === 0) {
+            statusBadge = '<span class="text-[9px] bg-slate-800 text-slate-400 border border-slate-700 px-2 py-0.5 rounded-full font-bold">All squared 👌</span>';
+          }
+
+          accountsGridHtml += `
+            <div data-vault="${escapeHtml((name + ' ' + i).toLowerCase())}" class="p-3.5 bg-slate-950/70 rounded-2xl border border-slate-800/80 hover:border-cyan-500/40 transition flex flex-col justify-between space-y-2">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-bold text-white truncate">${escapeHtml(name)}</span>
+                    <button onclick="promptPasscodeAction('editAccountName_${accKey}')" class="text-slate-500 hover:text-cyan-400 text-[10px]"><i class="fa-solid fa-pen"></i></button>
+                  </div>
+                  <p class="text-[10px] text-slate-500 font-mono">Vault #${i}</p>
+                </div>
+                ${statusBadge}
+              </div>
+              <div class="pt-1 border-t border-slate-800/60 space-y-1">
+                <div class="flex items-center justify-between gap-1">
+                  <span class="text-xs text-slate-400 font-semibold">Contributed:</span>
+                  <span class="flex items-center gap-1">
+                    <span class="text-sm font-black text-cyan-300">₱${contrib.toFixed(2)}</span>
+                    <button onclick="promptPasscodeAction('editContributed_${accKey}')" title="Edit past contributions" class="p-1 text-slate-500 hover:text-cyan-400 text-[10px]"><i class="fa-solid fa-pen"></i></button>
+                  </span>
+                </div>
+                <div class="flex items-baseline justify-between">
+                  <span class="text-xs text-slate-400 font-semibold">${bal < 0 ? 'Unpaid dues:' : 'Advance:'}</span>
+                  <span class="text-sm font-black ${bal >= 0 ? 'text-emerald-400' : 'text-rose-400'}">₱${Math.abs(bal).toFixed(2)}</span>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-1.5 pt-1">
+                <button onclick="promptPasscodeAction('addAdvance_${accKey}')" class="bg-cyan-600/20 hover:bg-cyan-600/30 text-cyan-300 border border-cyan-500/30 text-[10px] font-bold py-1.5 rounded-xl transition text-center" title="Deposit +₱5">
+                  +₱5
+                </button>
+                <button onclick="promptPasscodeAction('customAdvance_${accKey}')" class="bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-[10px] font-bold py-1.5 rounded-xl transition text-center" title="Custom Deposit Amount">
+                  +Custom
+                </button>
+                <button onclick="promptPasscodeAction('deductAccount_${accKey}')" class="bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/30 text-[10px] font-bold py-1.5 rounded-xl transition text-center" title="Deduct any amount">
+                  −Deduct
+                </button>
+                <button onclick="promptPasscodeAction('resetAccount_${accKey}')" class="bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-[10px] font-bold py-1.5 rounded-xl transition text-center" title="Reset balance to ₱0">
+                  Reset
+                </button>
+              </div>
+            </div>
+          `;
+        }
+        document.getElementById('studentAccountsGrid').innerHTML = accountsGridHtml;
+        const adjust = parseFloat(data.config && data.config.pastContributions) || 0;
+        document.getElementById('vaultTotalContrib').textContent = `₱${(totalContributed + totalAdvance + adjust).toFixed(2)}`;
+        document.getElementById('vaultTotalSub').textContent = `Student contributions ₱${totalContributed.toFixed(2)} + advances ₱${totalAdvance.toFixed(2)}${adjust ? ` + adjustment ₱${adjust.toFixed(2)}` : ''} • ${advCount} with advance • ${topUpCount} with unpaid dues`;
+        document.getElementById('vaultUnpaidTotal').textContent = `₱${totalUnpaid.toFixed(2)}`;
+        const homeUnpaid = document.getElementById('statUnpaidDues'); if (homeUnpaid) homeUnpaid.textContent = `₱${totalUnpaid.toFixed(2)}`;
+        if (window.applyVaultFilter) window.applyVaultFilter();
+
+        // Render Home Pinned Messages
+        const pinnedList = suggestions.filter(s => s.pinned);
+        const homePinnedHtml = pinnedList.length ? pinnedList.map(s => `
+          <div class="p-3.5 bg-slate-950/90 rounded-2xl border border-cyan-500/40 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-cyan-300">${escapeHtml(s.author)}</span>
+                <span class="bg-cyan-500/10 text-cyan-400 text-[9px] font-bold px-2 py-0.2 rounded-full border border-cyan-500/20">${escapeHtml(s.category || 'Idea')}</span>
+              </div>
+              <span class="text-[10px] text-slate-500">${s.date}${s.pinnedBy ? ' · pinned by ' + escapeHtml(s.pinnedBy) : ''}</span>
+            </div>
+            <p class="text-xs text-slate-200 leading-relaxed">${escapeHtml(s.text)}</p>
+          </div>
+        `).join('') : '<p class="text-slate-500 text-xs italic">No pinned announcements yet. The Officers can pin threads from the Chika tab!</p>';
+        document.getElementById('homePinnedContainer').innerHTML = homePinnedHtml;
+
+        // Vault-collected money vs store revenue (old entries are sorted by their label)
+        const isVault = d => d.type ? d.type === 'vault' : /^(Friday Auto-Deduct|Paid unpaid dues|Vault deduction)/.test(String(d.date || ''));
+        const vaultEntries = dues.filter(isVault);
+        const revenueEntries = dues.filter(d => !isVault(d));
+        // ---- Collected Contributions This Week (Mon-Sun) from the 48 vaults ----
+        const entryTime = d => {
+          if (d.ts) return d.ts;
+          const m = String(d.date || '').match(/(\d{4})-(\d{2})-(\d{2})/);
+          if (m) return new Date(+m[1], +m[2] - 1, +m[3], 12).getTime();
+          const t = Date.parse(d.date || '');
+          return isNaN(t) ? null : t;
+        };
+        const nowD = new Date();
+        const weekStart = new Date(nowD.getFullYear(), nowD.getMonth(), nowD.getDate() - ((nowD.getDay() + 6) % 7));
+        const weekEnd = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + 7);
+        const dayTotals = [0,0,0,0,0,0,0]; let weekSum = 0, weekN = 0;
+        const weekEntries = []; let fridayPaid = null;
+        vaultEntries.forEach(d => {
+          const t = entryTime(d);
+          if (t === null || t < weekStart.getTime() || t >= weekEnd.getTime()) return;
+          const amt = parseFloat(d.amount) || 0;
+          const idx = (new Date(t).getDay() + 6) % 7;
+          dayTotals[idx] += amt; weekSum += amt; weekN++; weekEntries.push(d);
+          if (/^Friday Auto-Deduct/.test(String(d.date || ''))) fridayPaid = (fridayPaid || 0) + (d.paidCount !== undefined ? d.paidCount : Math.round(amt / 5));
+        });
+        const fmtD = x => x.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
+        const lastDay = new Date(weekEnd.getTime() - 86400000);
+        const wr = document.getElementById('weekRange'); if (wr) wr.textContent = `${fmtD(weekStart)} – ${fmtD(lastDay)}, ${lastDay.getFullYear()}`;
+        const wc = document.getElementById('weekCollected'); if (wc) wc.textContent = `₱${weekSum.toFixed(2)}`;
+        const wn = document.getElementById('weekCount'); if (wn) wn.textContent = weekN ? `${weekN} vault collection${weekN > 1 ? 's' : ''}` : 'Nothing collected yet';
+        const wp = document.getElementById('weekPaidLine');
+        if (wp) wp.textContent = fridayPaid !== null ? `Friday ₱5 round: ${Math.min(fridayPaid, 48)} of 48 vaults paid · ${Math.max(48 - fridayPaid, 0)} still unpaid` : 'No Friday ₱5 round yet this week';
+        const wl = document.getElementById('weekList');
+        if (wl) wl.innerHTML = weekEntries.length ? weekEntries.map(d => `
+          <div class="flex items-center justify-between gap-2 text-[11px] sm:text-xs px-3 py-2 bg-slate-950/70 rounded-xl border border-slate-800/80">
+            <span class="text-slate-300 truncate">${escapeHtml(d.date || '')}${d.by ? ' · by ' + escapeHtml(d.by) : ''}</span>
+            <span class="font-bold text-emerald-300 flex-shrink-0">+₱${(parseFloat(d.amount) || 0).toFixed(2)}</span>
+          </div>`).join('') : '';
+        const wb = document.getElementById('weekBreakdown');
+        if (wb) wb.innerHTML = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((n, i) => `
+          <div class="text-center p-1.5 sm:p-2 rounded-xl border ${dayTotals[i] > 0 ? 'bg-emerald-500/10 border-emerald-500/40' : 'bg-slate-950/70 border-slate-800/80'}">
+            <p class="text-[9px] sm:text-[10px] font-black uppercase text-slate-400">${n}</p>
+            <p class="text-[10px] sm:text-xs font-bold ${dayTotals[i] > 0 ? 'text-emerald-300' : 'text-slate-600'}">${dayTotals[i] > 0 ? '₱' + (Math.round(dayTotals[i] * 100) / 100) : '–'}</p>
+          </div>`).join('');
+
+        // ---- To Buy announcements ----
+        const toBuy = Object.entries(data.toBuy || {}).map(([id, v]) => ({ id, ...v })).reverse();
+        const tb = document.getElementById('toBuyContainer');
+        if (tb) tb.innerHTML = toBuy.length ? toBuy.map(t => `
+          <div class="flex items-start justify-between gap-2 p-3 bg-slate-950/90 rounded-2xl border border-amber-500/30">
+            <div class="min-w-0">
+              <p class="text-xs sm:text-sm font-semibold text-slate-100 leading-snug">🛒 ${escapeHtml(t.text)}</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">${escapeHtml(t.date || '')}${t.by ? ' · by ' + escapeHtml(t.by) : ''}</p>
+            </div>
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              ${t.amount !== undefined ? `<span class="text-xs sm:text-sm font-bold text-amber-400">₱${(parseFloat(t.amount) || 0).toFixed(2)}</span>` : ''}
+              <button onclick="promptPasscodeAction('deleteToBuy_${t.id}')" class="p-1 text-xs text-slate-400 hover:text-rose-400 transition"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+          </div>`).join('') : '<p class="text-slate-500 text-xs italic">Nothing to buy right now. 🎉</p>';
+
+        // ---- Next Project ----
+        const proj = data.nextProject || null;
+        const projItems = Object.entries(data.nextProjectItems || {}).map(([id, v]) => ({ id, ...v }));
+        const projTotal = projItems.reduce((sum, it) => sum + (parseFloat(it.price) || 0) * (parseInt(it.qty, 10) || 1), 0);
+        const cashNow = currentBalance + cashAdj;
+        const np = document.getElementById('nextProjectContainer');
+        if (np) {
+          if (!proj && !projItems.length) {
+            np.innerHTML = '<p class="text-slate-500 text-xs italic">No project planned yet. The Officers can set one with ✏️ Set.</p>';
+          } else {
+            const gap = projTotal - cashNow;
+            np.innerHTML = `
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <div class="min-w-0">
+                  <p class="text-sm sm:text-base font-bold text-white">${escapeHtml((proj && proj.name) || 'Untitled project')}</p>
+                  ${proj && proj.target ? `<p class="text-[11px] text-purple-300 font-semibold">📅 ${escapeHtml(proj.target)}</p>` : ''}
+                  ${proj && proj.by ? `<p class="text-[10px] text-slate-500">Set by ${escapeHtml(proj.by)}</p>` : ''}
+                </div>
+                <button onclick="promptPasscodeAction('clearProject')" title="Clear project" class="p-1 text-xs text-slate-500 hover:text-rose-400 transition"><i class="fa-solid fa-trash-can"></i></button>
+              </div>
+              <div class="space-y-2">
+                ${projItems.length ? projItems.map(it => {
+                  const q = parseInt(it.qty, 10) || 1, pr = parseFloat(it.price) || 0;
+                  return `<div class="flex items-center justify-between gap-2 p-2.5 bg-slate-950/90 rounded-xl border border-slate-800/80">
+                    <div class="min-w-0">
+                      <p class="text-xs font-semibold text-slate-100 truncate">${escapeHtml(it.name)}</p>
+                      <p class="text-[10px] text-slate-400">${q} × ₱${pr.toFixed(2)}${it.by ? ' · by ' + escapeHtml(it.by) : ''}</p>
+                    </div>
+                    <div class="flex items-center gap-1.5 flex-shrink-0">
+                      <span class="text-xs font-bold text-purple-300">₱${(q * pr).toFixed(2)}</span>
+                      <button onclick="promptPasscodeAction('editProjectItem_${it.id}')" class="p-1 text-xs text-slate-400 hover:text-cyan-400 transition"><i class="fa-solid fa-pen"></i></button>
+                      <button onclick="promptPasscodeAction('deleteProjectItem_${it.id}')" class="p-1 text-xs text-slate-400 hover:text-rose-400 transition"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                  </div>`;
+                }).join('') : '<p class="text-slate-500 text-xs italic">No items yet. Tap + Item to add what needs buying.</p>'}
+              </div>
+              <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                <span class="text-[11px] font-black uppercase tracking-wider text-slate-400">Total needed</span>
+                <span class="text-lg sm:text-xl font-black text-purple-300">₱${projTotal.toFixed(2)}</span>
+              </div>
+              ${projItems.length ? `<p class="text-[11px] mt-1 font-semibold ${gap > 0 ? 'text-amber-400' : 'text-emerald-400'}">${gap > 0 ? `Short by ₱${gap.toFixed(2)} vs. cash on hand` : 'Cash on hand already covers this ✅'}</p>` : ''}`;
+          }
+        }
+
+        // Render Expenses
+        const expHtml = expenses.length ? expenses.map(e => `
+          <div class="flex justify-between items-center p-3 sm:p-3.5 bg-slate-950/70 rounded-2xl border border-slate-800/80 hover:border-cyan-500/40 transition">
+            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-xs flex-shrink-0">
+                <i class="fa-solid fa-receipt"></i>
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs sm:text-sm font-semibold text-slate-100 truncate">${escapeHtml(e.title)}</p>
+                <p class="text-[10px] sm:text-[11px] text-slate-400 font-medium">${e.date}${e.by ? ' · by ' + escapeHtml(e.by) : ''}${e.editedBy ? ' · edited by ' + escapeHtml(e.editedBy) : ''}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              <span class="text-xs sm:text-sm font-bold text-cyan-400">-₱${parseFloat(e.amount).toFixed(2)}</span>
+              <div class="flex items-center gap-0.5 sm:gap-1">
+                <button onclick="promptPasscodeAction('editExpense_${e.id}')" class="p-1 text-xs text-slate-400 hover:text-cyan-400 transition"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="promptPasscodeAction('deleteExpense_${e.id}')" class="p-1 text-xs text-slate-400 hover:text-rose-400 transition"><i class="fa-solid fa-trash-can"></i></button>
+              </div>
+            </div>
+          </div>
+        `).join('') : '<p class="text-slate-500 text-xs sm:text-sm">No expenses yet. So thrifty! 🤑</p>';
+        document.getElementById('expensesContainerOverview').innerHTML = expHtml;
+        document.getElementById('expensesContainerFull').innerHTML = expHtml;
+
+        // Render Fines
+        const finesHtml = fines.length ? fines.map(f => `
+          <div class="flex justify-between items-center p-3 sm:p-3.5 bg-slate-950/70 rounded-2xl border border-slate-800/80 hover:border-rose-500/40 transition">
+            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg ${f.paid ? 'bg-slate-800 text-slate-500' : 'bg-rose-500/10 text-rose-400'} flex items-center justify-center text-xs flex-shrink-0">
+                <i class="fa-solid ${f.paid ? 'fa-check-double' : 'fa-gavel'}"></i>
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs sm:text-sm font-semibold text-slate-100 truncate">${escapeHtml(f.student)} ${f.paid ? '<span class="text-[9px] bg-cyan-500/10 text-cyan-400 px-1.5 py-0.2 rounded-full ml-1">Paid 🎉</span>' : ''}</p>
+                <p class="text-[10px] sm:text-[11px] text-slate-400 font-medium truncate">${escapeHtml(f.reason)}${f.by ? ' · added by ' + escapeHtml(f.by) : ''}${f.paid && f.paidBy ? ' · marked paid by ' + escapeHtml(f.paidBy) : ''}${f.editedBy ? ' · edited by ' + escapeHtml(f.editedBy) : ''}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              <span class="text-xs sm:text-sm font-bold ${f.paid ? 'text-slate-500 line-through' : 'text-rose-400'}">₱${parseFloat(f.amount).toFixed(2)}</span>
+              <button onclick="promptPasscodeAction('toggleFinePaid_${f.id}')" class="text-[9px] sm:text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1.5 rounded-lg border border-slate-700 transition">
+                ${f.paid ? 'Mark unpaid' : 'Mark paid'}
+              </button>
+              <div class="flex items-center gap-0.5 sm:gap-1">
+                <button onclick="promptPasscodeAction('editFine_${f.id}')" class="p-1 text-xs text-slate-400 hover:text-cyan-400 transition"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="promptPasscodeAction('deleteFine_${f.id}')" class="p-1 text-xs text-slate-400 hover:text-rose-400 transition"><i class="fa-solid fa-trash-can"></i></button>
+              </div>
+            </div>
+          </div>
+        `).join('') : '<p class="text-slate-500 text-xs sm:text-sm">No pending fines! What a well-behaved class 😇</p>';
+        document.getElementById('finesContainerOverview').innerHTML = finesHtml;
+        document.getElementById('finesContainerFull').innerHTML = finesHtml;
+
+        // Render Dues
+        const duesHtml = revenueEntries.length ? revenueEntries.map(d => `
+          <div class="flex justify-between items-center p-3 sm:p-3.5 bg-slate-950/70 rounded-2xl border border-slate-800/80 transition">
+            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 text-xs flex-shrink-0">
+                <i class="fa-solid fa-coins"></i>
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs sm:text-sm font-semibold text-slate-100 truncate">${escapeHtml(d.name || 'Store Revenue')}</p>
+                <p class="text-[10px] sm:text-[11px] text-slate-400 font-medium">${d.date}${d.by ? ' · by ' + escapeHtml(d.by) : ''}${d.editedBy ? ' · edited by ' + escapeHtml(d.editedBy) : ''}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              <span class="text-xs sm:text-sm font-bold text-emerald-400">+₱${parseFloat(d.amount).toFixed(2)}</span>
+              <div class="flex items-center gap-0.5 sm:gap-1">
+                <button onclick="promptPasscodeAction('editDues_${d.id}')" class="p-1 text-xs text-slate-400 hover:text-cyan-400 transition"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="promptPasscodeAction('deleteDues_${d.id}')" class="p-1 text-xs text-slate-400 hover:text-rose-400 transition"><i class="fa-solid fa-trash-can"></i></button>
+              </div>
+            </div>
+          </div>
+        `).join('') : '<p class="text-slate-500 text-xs sm:text-sm">No revenue yet... who will go first? 👀</p>';
+        document.getElementById('duesContainerFull').innerHTML = duesHtml;
+        const rt = document.getElementById('revenueTotal');
+        if (rt) rt.textContent = `Total store revenue: ₱${revenueEntries.reduce((a, d) => a + (parseFloat(d.amount) || 0), 0).toFixed(2)}`;
+
+        // Render Threads / Suggestions
+        const suggBadge = document.getElementById('suggestionBadge');
+        if (suggestions.length) {
+          suggBadge.textContent = suggestions.length;
+          suggBadge.classList.remove('hidden');
+        } else {
+          suggBadge.classList.add('hidden');
+        }
+
+        const pinnedHtml = pinnedList.length ? pinnedList.map(s => `
+          <div class="p-3.5 sm:p-4 bg-slate-950/90 rounded-2xl border border-cyan-500/40 space-y-2">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-full ${window.getAvatarColor(s.author)} flex items-center justify-center text-white font-bold text-[11px] uppercase shadow-sm flex-shrink-0">
+                  ${escapeHtml(s.author.substring(1, 3))}
+                </div>
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-bold text-white">${escapeHtml(s.author)}</span>
+                    <span class="bg-cyan-500/10 text-cyan-400 text-[9px] font-bold px-2 py-0.2 rounded-full border border-cyan-500/20">${escapeHtml(s.category || 'Idea')}</span>
+                  </div>
+                  <p class="text-[10px] text-slate-400">${s.date}${s.pinned && s.pinnedBy ? ' · pinned by ' + escapeHtml(s.pinnedBy) : ''}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-1">
+                <button onclick="promptPasscodeAction('togglePinSuggestion_${s.id}')" class="text-cyan-400 hover:text-cyan-300 text-xs p-1" title="Unpin thread"><i class="fa-solid fa-thumbtack rotate-45"></i></button>
+                <button onclick="promptPasscodeAction('editSuggestion_${s.id}')" class="text-slate-400 hover:text-cyan-400 text-xs p-1" title="Edit thread"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="promptPasscodeAction('deleteSuggestion_${s.id}')" class="text-slate-400 hover:text-rose-400 text-xs p-1" title="Delete thread"><i class="fa-solid fa-trash-can"></i></button>
+              </div>
+            </div>
+            <p class="text-xs text-slate-200 pl-10 sm:pl-11 leading-relaxed">${escapeHtml(s.text)}</p>
+            <div class="flex items-center gap-5 pl-10 sm:pl-11 pt-1 text-[11px] text-slate-400">
+              <button onclick="upvoteSuggestion('${s.id}', ${s.upvotes || 0})" class="hover:text-cyan-400 flex items-center gap-1 transition">
+                <i class="fa-regular fa-heart"></i> ${s.upvotes || 0}
+              </button>
+              <span class="flex items-center gap-1"><i class="fa-regular fa-comment"></i> Thread</span>
+            </div>
+          </div>
+        `).join('') : '<p class="text-slate-500 text-xs italic">Nothing pinned yet. Go pin something! 📌</p>';
+        document.getElementById('pinnedSuggestionsContainer').innerHTML = pinnedHtml;
+
+        const regularList = suggestions.filter(s => !s.pinned);
+        const suggHtmlFull = regularList.length ? regularList.map(s => `
+          <div class="p-3.5 sm:p-4 bg-slate-950/70 rounded-2xl border border-slate-800/80 hover:border-cyan-500/30 transition space-y-2">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-full ${window.getAvatarColor(s.author)} flex items-center justify-center text-white font-bold text-[11px] uppercase shadow-sm flex-shrink-0">
+                  ${escapeHtml(s.author.substring(1, 3))}
+                </div>
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-bold text-white">${escapeHtml(s.author)}</span>
+                    <span class="bg-cyan-500/10 text-cyan-400 text-[9px] font-bold px-2 py-0.2 rounded-full border border-cyan-500/20">${escapeHtml(s.category || 'Idea')}</span>
+                  </div>
+                  <p class="text-[10px] text-slate-500">${s.date}</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-1">
+                <button onclick="promptPasscodeAction('togglePinSuggestion_${s.id}')" class="text-slate-500 hover:text-cyan-400 text-xs p-1" title="Pin thread"><i class="fa-solid fa-thumbtack"></i></button>
+                <button onclick="promptPasscodeAction('editSuggestion_${s.id}')" class="text-slate-500 hover:text-cyan-400 text-xs p-1" title="Edit thread"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="promptPasscodeAction('deleteSuggestion_${s.id}')" class="text-slate-500 hover:text-rose-400 text-xs p-1" title="Delete thread"><i class="fa-solid fa-trash-can"></i></button>
+              </div>
+            </div>
+            <p class="text-xs text-slate-300 pl-10 sm:pl-11 leading-relaxed">${escapeHtml(s.text)}</p>
+            <div class="flex items-center gap-5 pl-10 sm:pl-11 pt-1 text-[11px] text-slate-400">
+              <button onclick="upvoteSuggestion('${s.id}', ${s.upvotes || 0})" class="hover:text-cyan-400 flex items-center gap-1 transition">
+                <i class="fa-regular fa-heart"></i> ${s.upvotes || 0}
+              </button>
+              <span class="flex items-center gap-1"><i class="fa-regular fa-comment"></i> Thread</span>
+            </div>
+          </div>
+        `).join('') : '<p class="text-slate-500 text-xs sm:text-sm">So quiet... start a chika! 🦗</p>';
+        document.getElementById('suggestionsContainerFull').innerHTML = suggHtmlFull;
+
+        window.checkFridayDeduction(false);
+      });
+    }
+  </script>
+  <script>
+    // ---------- FUN LAYER: toasts, confetti, taglines ----------
+    window.showToast = function(msg) {
+      const box = document.getElementById('toastBox');
+      if (!box) return;
+      const t = document.createElement('div');
+      t.className = 'toast glass-card px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold text-cyan-100 shadow-xl';
+      t.textContent = msg;
+      box.appendChild(t);
+      setTimeout(() => { t.style.opacity = 0; setTimeout(() => t.remove(), 400); }, 3200);
+    };
+    window.burstConfetti = function(list) {
+      const bits = list || ['🎉','✨','💰','🪙','💙','🩺','⭐'];
+      for (let i = 0; i < 28; i++) {
+        const c = document.createElement('span');
+        c.className = 'confetti';
+        c.textContent = bits[Math.floor(Math.random() * bits.length)];
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.animationDuration = (1.8 + Math.random() * 1.8) + 's';
+        c.style.animationDelay = (Math.random() * 0.4) + 's';
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 4500);
+      }
+    };
+
+    const taglines = [
+      "Hey there! Let's check on our class money. 🕵️",
+      "Nothing slips through here, everything has a receipt! 🧾",
+      "Class money: safe with us. 🔒",
+      "Future doctors, nurses, scientists... at treasurers! 🩺",
+      "Thank you to everyone who pitches in! 💙",
+      "Pag may ambag, may pag-asa! (Where there's a contribution, there's hope!) 💪"
+    ];
+    const bannerMsgs = [
+      "Live and synced with the whole class ⚡",
+      "Real-time updates, nothing hidden! 👀",
+      "Friday = ₱5 again, get that wallet ready! 💸",
+      "Pro tip: refresh the page if you ever doubt the numbers 😏"
+    ];
+    window.addEventListener('DOMContentLoaded', () => {
+      const tg = document.getElementById('heroTagline');
+      if (tg) tg.textContent = taglines[Math.floor(Math.random() * taglines.length)];
+      let bi = 0;
+      setInterval(() => {
+        const b = document.getElementById('bannerText');
+        if (b) b.textContent = bannerMsgs[++bi % bannerMsgs.length];
+      }, 7000);
+      // sparkle on the shuffle button
+      document.querySelectorAll('button[onclick="nextFunFact()"]').forEach(b =>
+        b.addEventListener('click', () => showToast('🧠 Brain food, served!')));
+      // bump the numbers when they change
+      ['statBalance','statCollected','statSpent','statPendingFines','statUnpaidDues'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        let last = el.textContent;
+        new MutationObserver(() => {
+          if (el.textContent !== last) { last = el.textContent; el.classList.remove('stat-bump'); void el.offsetWidth; el.classList.add('stat-bump'); }
+        }).observe(el, { childList: true, characterData: true, subtree: true });
+      });
+    });
+
+    const _sw = window.switchTab;
+    window.switchTab = function(id) {
+      _sw(id);
+      const el = document.getElementById('tabContent-' + id);
+      if (el) { el.classList.remove('tab-pop'); void el.offsetWidth; el.classList.add('tab-pop'); }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // ---------- CLASS PASSWORD GATE ----------
+    const DEFAULT_CLASS_HASH = "bae806ec758be2de4502f220f022ed70f70878df1cfb58ba5358a09a2efed2ac"; // default password: acadh2026 (change it in the sliders menu)
+    window.sha256Hex = async function(str) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    };
+    window.getClassHash = async function() {
+      try {
+        if (typeof db !== 'undefined' && db) {
+          const snap = await Promise.race([db.ref('config/classPasswordHash').once('value'), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 5000))]);
+          if (snap.val()) return snap.val();
+        }
+      } catch (e) {}
+      return DEFAULT_CLASS_HASH;
+    };
+    window.unlockSite = function() {
+      document.getElementById('classGate').classList.add('hidden');
+    };
+    window.submitClassPassword = async function() {
+      const input = document.getElementById('gateInput');
+      const msg = document.getElementById('gateMsg');
+      const btn = document.getElementById('gateBtn');
+      const entered = input.value.trim().toLowerCase();
+      if (!entered) { msg.textContent = 'Please type the password first 😊'; return; }
+      if (!(window.crypto && crypto.subtle)) { msg.textContent = 'Please open the site using an https link 🙏'; return; }
+      btn.disabled = true;
+      const h = await window.sha256Hex(entered);
+      const real = await window.getClassHash();
+      btn.disabled = false;
+      if (h === real) {
+        if (document.getElementById('gateRemember').checked) localStorage.setItem('classUnlock', h);
+        window.unlockSite();
+        burstConfetti();
+        showToast('Welcome to the Central Bank! 🎉');
+      } else {
+        msg.textContent = 'Hmm, wrong password. Try again! 🙈';
+        const card = document.getElementById('gateCard');
+        card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+        input.select();
+      }
+    };
+    window.addEventListener('DOMContentLoaded', () => {
+      const gi = document.getElementById('gateInput');
+      if (gi) gi.addEventListener('keydown', ev => { if (ev.key === 'Enter') window.submitClassPassword(); });
+      const saved = localStorage.getItem('classUnlock');
+      if (saved) window.getClassHash().then(real => { if (saved === real) window.unlockSite(); });
+    });
+
+    // ---------- CLASS PASSWORD OPTIONS ----------
+    const cpEl = id => document.getElementById(id);
+    window.openClassPwModal = function() {
+      ['cpAuth','cpNew','cpConfirm'].forEach(id => { cpEl(id).value = ''; });
+      cpEl('cpShow').checked = false; window.toggleClassPwVisibility();
+      cpEl('officerSelectCp').value = ''; cpEl('classPwModal').classList.remove('hidden');
+    };
+    window.closeClassPwModal = function() { cpEl('classPwModal').classList.add('hidden'); };
+    window.toggleClassPwVisibility = function() {
+      const t = cpEl('cpShow').checked ? 'text' : 'password';
+      cpEl('cpNew').type = t; cpEl('cpConfirm').type = t;
+    };
+    function cpAuthOk() {
+      const offCp = window.readOfficer('officerSelectCp'); if (!offCp) return false;
+      if (cpEl('cpAuth').value.trim().toLowerCase() !== masterPasscode.toLowerCase()) { alert("Officers' passcode is incorrect!"); return false; }
+      currentOfficer = offCp;
+      return true;
+    }
+    window.saveClassPassword = async function() {
+      if (!cpAuthOk()) return;
+      const pw = cpEl('cpNew').value.trim().toLowerCase();
+      if (pw.length < 4) { alert("The class password should be at least 4 characters."); return; }
+      if (pw !== cpEl('cpConfirm').value.trim().toLowerCase()) { alert("The two passwords don't match!"); return; }
+      if (!(window.crypto && crypto.subtle)) { alert("Please open the site using an https link to change the password."); return; }
+      const h = await window.sha256Hex(pw);
+      if (typeof db !== 'undefined' && db) await db.ref('config/classPasswordHash').set(h);
+      localStorage.setItem('classUnlock', h);
+      window.closeClassPwModal();
+      showToast('🔑 Class password updated! Share the new one with your classmates.');
+    };
+    window.resetClassPassword = async function() {
+      if (!cpAuthOk()) return;
+      if (!confirm("Reset the class password back to the default?")) return;
+      if (typeof db !== 'undefined' && db) await db.ref('config/classPasswordHash').remove();
+      localStorage.setItem('classUnlock', DEFAULT_CLASS_HASH);
+      window.closeClassPwModal();
+      showToast('🔑 Class password is back to the default.');
+    };
+    window.lockThisDevice = function() {
+      localStorage.removeItem('classUnlock');
+      unlockedUntil = 0;
+      window.closeClassPwModal();
+      cpEl('gateInput').value = ''; cpEl('gateMsg').textContent = '';
+      cpEl('classGate').classList.remove('hidden');
+    };
+
+    // ---------- VAULT SEARCH ----------
+    window.showAllVaults = false;
+    window.localDateStr = function() {
+      const n = new Date(), pad = x => String(x).padStart(2, '0');
+      return `${n.getFullYear()}-${pad(n.getMonth() + 1)}-${pad(n.getDate())}`;
+    };
+    window.applyVaultFilter = function() {
+      const input = document.getElementById('vaultSearch');
+      if (!input) return;
+      const q = (input.value || '').trim().toLowerCase();
+      const cards = document.querySelectorAll('#studentAccountsGrid > div');
+      let shown = 0;
+      cards.forEach(c => {
+        const match = q ? (c.dataset.vault || '').includes(q) : window.showAllVaults;
+        c.style.display = match ? '' : 'none';
+        if (match) shown++;
+      });
+      const hint = document.getElementById('vaultHint');
+      const count = document.getElementById('vaultCount');
+      if (!cards.length) { hint.classList.add('hidden'); count.textContent = ''; return; }
+      if (q && shown === 0) { hint.textContent = 'No vault found for "' + q + '" 🔍 Check the spelling!'; hint.classList.remove('hidden'); }
+      else if (!q && !window.showAllVaults) { hint.textContent = 'Type your name above to find your vault 🔍'; hint.classList.remove('hidden'); }
+      else hint.classList.add('hidden');
+      count.textContent = shown ? 'Showing ' + shown + ' of ' + cards.length + ' vaults' : '';
+      document.getElementById('vaultShowAllBtn').textContent = window.showAllVaults ? 'Hide all' : 'Show all 48';
+    };
+    window.toggleShowAllVaults = function() { window.showAllVaults = !window.showAllVaults; window.applyVaultFilter(); };
+    window.clearVaultSearch = function() { const i = document.getElementById('vaultSearch'); i.value = ''; window.applyVaultFilter(); i.focus(); };
+
+    // Live celebrations: everyone sees these when an officer adds something
+    (function watch() {
+      if (typeof db === 'undefined' || !db) return;
+      const hook = (path, handler) => {
+        let ready = false;
+        db.ref(path).limitToLast(1).on('child_added', snap => { if (ready) handler(snap.val() || {}); });
+        db.ref(path).once('value', () => { ready = true; });
+      };
+      hook('dues', d => { burstConfetti(); showToast((d.type === 'vault' ? '🔐 Vault contributions collected! ₱' : '💰 New store revenue' + (d.name ? ' (' + d.name + ')' : '') + '! ₱') + (parseFloat(d.amount) || 0).toFixed(2) + (d.by ? ' (by ' + d.by + ')' : '')); });
+      hook('expenses', e => showToast('🧾 Expense alert: ' + (e.title || 'something') + ' (₱' + (parseFloat(e.amount) || 0).toFixed(2) + ')' + (e.by ? ' — by ' + e.by : '')));
+      hook('fines', f => { showToast('🌼 New reminder for ' + (f.student || 'classmate') + ' 💛' + (f.by ? ' (by ' + f.by + ')' : '')); });
+      hook('suggestions', g => showToast('💬 New chika from ' + (g.author || 'someone') + '!'));
+    })();
+  </script>
+</body>
+</html>
